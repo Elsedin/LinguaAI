@@ -1,0 +1,74 @@
+# Build results
+[Bb]in/
+[Oo]bj/
+[Oo]ut/
+[Ll]og/
+[Ll]ogs/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# .NET
+*.user
+*.userosscache
+*.suo
+*.sln.docstates
+.vs/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+*.nupkg
+*.snupkg
+TestResults/
+[Tt]est[Rr]esult*/
+*.DotSettings.user
+
+# Local overrides (never commit real secrets)
+**/appsettings.*.local.json
+*.local.json
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets.json
+
+# Node / Angular
+node_modules/
+dist/
+.tmp/
+.angular/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# IDE / editors
+.idea/
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json.example
+
+# OS
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# SQL / local databases
+*.mdf
+*.ldf
+*.db
+*.sqlite
+*.sqlite3
+
+# Misc
+*.log
+*.tmp
+.publish/
+publish/

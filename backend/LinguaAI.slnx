@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="LinguaAI.Api/LinguaAI.Api.csproj" />
+  <Project Path="LinguaAI.Application/LinguaAI.Application.csproj" />
+  <Project Path="LinguaAI.Infrastructure/LinguaAI.Infrastructure.csproj" />
+  <Project Path="LinguaAI.Tests/LinguaAI.Tests.csproj" />
+</Solution>
