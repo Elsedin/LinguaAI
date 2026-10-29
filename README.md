@@ -35,8 +35,13 @@ LinguaAI/
 
 ```bash
 cd backend
-dotnet run --project LinguaAI.Api
+dotnet run --project LinguaAI.Api --launch-profile http
 ```
+
+- API: `http://localhost:5182`
+- Health check: `http://localhost:5182/api/health`
+- CORS allows the Angular origin `http://localhost:4200`
+- SQL connection string key: `ConnectionStrings:DefaultConnection` (Windows auth to `localhost` / database `LinguaAI`)
 
 ### Frontend
 

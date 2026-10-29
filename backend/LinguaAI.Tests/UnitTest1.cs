@@ -3,8 +3,8 @@
 public class UnitTest1
 {
     [Fact]
-    public void Test1()
+    public void Placeholder_passes()
     {
-
+        Assert.True(true);
     }
 }
