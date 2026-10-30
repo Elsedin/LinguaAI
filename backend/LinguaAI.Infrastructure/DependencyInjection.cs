@@ -1,3 +1,6 @@
+using LinguaAI.Application.Abstractions;
+using LinguaAI.Application.Translations;
+using LinguaAI.Infrastructure.Ai;
 using LinguaAI.Infrastructure.Data;
 using LinguaAI.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http;
@@ -5,6 +8,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace LinguaAI.Infrastructure;
 
@@ -55,6 +59,22 @@ public static class DependencyInjection
             };
         });
 
+        services.Configure<GeminiOptions>(configuration.GetSection(GeminiOptions.SectionName));
+        services.PostConfigure<GeminiOptions>(opts =>
+        {
+            if (string.IsNullOrWhiteSpace(opts.ApiKey))
+                opts.ApiKey = Environment.GetEnvironmentVariable("GEMINI_API_KEY") ?? string.Empty;
+        });
+
+        services.AddScoped<ITranslationService, TranslationService>();
+        services.AddHttpClient<ITranslationProvider, GeminiTranslationProvider>((sp, client) =>
+        {
+            var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
+            client.BaseAddress = new Uri(opts.BaseUrl);
+            client.Timeout = TimeSpan.FromSeconds(Math.Clamp(opts.TimeoutSeconds, 5, 120));
+        });
+
         return services;
     }
 }
+

@@ -22,6 +22,8 @@ public sealed class GlobalExceptionHandler(
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             KeyNotFoundException => StatusCodes.Status404NotFound,
             ArgumentException => StatusCodes.Status400BadRequest,
+            HttpRequestException => StatusCodes.Status502BadGateway,
+            TaskCanceledException => StatusCodes.Status504GatewayTimeout,
             _ => StatusCodes.Status500InternalServerError
         };
 
@@ -35,9 +37,14 @@ public sealed class GlobalExceptionHandler(
                 StatusCodes.Status401Unauthorized => "Unauthorized",
                 StatusCodes.Status404NotFound => "Not Found",
                 StatusCodes.Status400BadRequest => "Bad Request",
+                StatusCodes.Status502BadGateway => "Bad Gateway",
+                StatusCodes.Status504GatewayTimeout => "Gateway Timeout",
                 _ => "An unexpected error occurred"
             },
-            Detail = statusCode == StatusCodes.Status500InternalServerError && !environment.IsDevelopment()
+            Detail = (statusCode is StatusCodes.Status500InternalServerError
+                    or StatusCodes.Status502BadGateway
+                    or StatusCodes.Status504GatewayTimeout)
+                    && !environment.IsDevelopment()
                 ? "An unexpected error occurred. Please try again later."
                 : exception.Message,
             Instance = httpContext.Request.Path
