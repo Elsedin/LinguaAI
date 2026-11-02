@@ -1,0 +1,123 @@
+<section class="translator" aria-labelledby="translator-brand">
+  <header class="translator__intro">
+    <p class="translator__eyebrow">AI translation</p>
+    <h1 id="translator-brand" class="translator__brand">LinguaAI</h1>
+    <p class="translator__lead">
+      Translate between Bosnian, Croatian, Serbian, English and more — with style control.
+    </p>
+  </header>
+
+  <form class="translator__form" (ngSubmit)="translate()">
+    <div class="translator__toolbar">
+      <label class="field">
+        <span class="field__label">From</span>
+        <select
+          class="field__control"
+          name="sourceLanguage"
+          [ngModel]="sourceLanguage()"
+          (ngModelChange)="sourceLanguage.set($event)"
+        >
+          @for (language of sourceLanguages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <button
+        type="button"
+        class="swap"
+        (click)="swapLanguages()"
+        [disabled]="!canSwap()"
+        aria-label="Swap languages"
+        title="Swap languages"
+      >
+        ⇄
+      </button>
+
+      <label class="field">
+        <span class="field__label">To</span>
+        <select
+          class="field__control"
+          name="targetLanguage"
+          [ngModel]="targetLanguage()"
+          (ngModelChange)="targetLanguage.set($event)"
+        >
+          @for (language of targetLanguages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field field--style">
+        <span class="field__label">Style</span>
+        <select
+          class="field__control"
+          name="style"
+          [ngModel]="style()"
+          (ngModelChange)="style.set($event)"
+        >
+          @for (item of styles; track item.value) {
+            <option [value]="item.value">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="translator__panels">
+      <div class="panel">
+        <div class="panel__meta">
+          <span>Source</span>
+          <span [class.panel__count--warn]="characterCount() > maxLength * 0.9">
+            {{ characterCount() }} / {{ maxLength }}
+          </span>
+        </div>
+        <textarea
+          class="panel__text"
+          name="sourceText"
+          rows="10"
+          [attr.maxlength]="maxLength"
+          placeholder="Type or paste text to translate…"
+          [ngModel]="sourceText()"
+          (ngModelChange)="sourceText.set($event)"
+        ></textarea>
+      </div>
+
+      <div class="panel panel--output" [class.panel--loading]="loading()">
+        <div class="panel__meta">
+          <span>Translation</span>
+          <div class="panel__actions">
+            <button
+              type="button"
+              class="ghost"
+              (click)="copyTranslation()"
+              [disabled]="!translatedText()"
+            >
+              {{ copied() ? 'Copied' : 'Copy' }}
+            </button>
+            <button type="button" class="ghost" (click)="clearAll()">Clear</button>
+          </div>
+        </div>
+        <textarea
+          class="panel__text"
+          rows="10"
+          readonly
+          [value]="translatedText()"
+          placeholder="{{ loading() ? 'Translating…' : 'Result appears here' }}"
+        ></textarea>
+        @if (loading()) {
+          <div class="panel__spinner" aria-live="polite">Translating…</div>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="translator__error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="translator__submit">
+      <button type="submit" class="primary" [disabled]="!canTranslate()">
+        {{ loading() ? 'Working…' : 'Translate' }}
+      </button>
+    </div>
+  </form>
+</section>

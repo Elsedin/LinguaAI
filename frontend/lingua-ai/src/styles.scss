@@ -1,1 +1,46 @@
-/* You can add global styles to this file, and also import other style files */
+:root {
+  --font-display: 'Syne', 'Avenir Next', 'Segoe UI', sans-serif;
+  --font-body: 'Manrope', 'Avenir Next', 'Segoe UI', sans-serif;
+  --ink: #16323f;
+  --muted: #5b717c;
+  --accent: #1f8a7a;
+  --accent-strong: #0f5f56;
+  --warn: #c45c26;
+  --line: color-mix(in srgb, #16323f 14%, transparent);
+  --surface: #f3f7f6;
+  --surface-strong: #e7f0ee;
+  --page-a: #e8f2ef;
+  --page-b: #f7f4ee;
+  --page-c: #dcecf0;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-body);
+  color: var(--ink);
+  background:
+    radial-gradient(1200px 600px at 8% -10%, color-mix(in srgb, var(--page-c) 80%, white), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, color-mix(in srgb, var(--page-a) 90%, white), transparent 55%),
+    linear-gradient(165deg, var(--page-b), var(--page-a) 45%, var(--page-c));
+  background-attachment: fixed;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
