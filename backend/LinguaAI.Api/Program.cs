@@ -1,4 +1,5 @@
 using LinguaAI.Api.ExceptionHandling;
+using LinguaAI.Api.RateLimiting;
 using LinguaAI.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,6 +8,7 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddTranslationRateLimiting(builder.Configuration);
 
 builder.Services.AddCors(options =>
 {
@@ -36,6 +38,7 @@ app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseHttpsRedirection();
 app.UseCors("Frontend");
+app.UseRateLimiter();
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
