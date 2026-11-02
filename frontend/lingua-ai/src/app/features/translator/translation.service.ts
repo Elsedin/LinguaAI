@@ -27,6 +27,10 @@ export class TranslationService {
       return 'Cannot reach the API. Is LinguaAI.Api running?';
     }
 
+    if (error.status === 429) {
+      return 'Too many translation requests. Please wait a moment and try again.';
+    }
+
     return error.message || 'Translation failed.';
   }
 }
