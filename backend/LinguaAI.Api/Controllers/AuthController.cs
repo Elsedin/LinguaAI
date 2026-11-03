@@ -1,5 +1,6 @@
 ﻿using LinguaAI.Application.Auth;
 using LinguaAI.Infrastructure.Identity;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
@@ -31,11 +32,7 @@ public class AuthController(
 
         await signInManager.SignInAsync(user, isPersistent: true);
 
-        return Ok(new AuthUserDto
-        {
-            Id = user.Id,
-            Email = user.Email!
-        });
+        return Ok(ToDto(user));
     }
 
     [HttpPost("login")]
@@ -56,10 +53,35 @@ public class AuthController(
         if (!signInResult.Succeeded)
             return Unauthorized(new { detail = "Invalid email or password." });
 
-        return Ok(new AuthUserDto
-        {
-            Id = user.Id,
-            Email = user.Email!
-        });
+        return Ok(ToDto(user));
     }
+
+    [Authorize]
+    [HttpPost("logout")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout()
+    {
+        await signInManager.SignOutAsync();
+        return NoContent();
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    [ProducesResponseType(typeof(AuthUserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<ActionResult<AuthUserDto>> Me()
+    {
+        var user = await userManager.GetUserAsync(User);
+        if (user is null)
+            return Unauthorized(new { detail = "Not authenticated." });
+
+        return Ok(ToDto(user));
+    }
+
+    private static AuthUserDto ToDto(ApplicationUser user) => new()
+    {
+        Id = user.Id,
+        Email = user.Email!
+    };
 }
