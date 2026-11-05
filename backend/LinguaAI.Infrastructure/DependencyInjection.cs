@@ -41,7 +41,7 @@ public static class DependencyInjection
         {
             options.Cookie.Name = "LinguaAI.Auth";
             options.Cookie.HttpOnly = true;
-            options.Cookie.SameSite = SameSiteMode.None;
+            options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.SecurePolicy = CookieSecurePolicy.SameAsRequest;
             options.SlidingExpiration = true;
             options.ExpireTimeSpan = TimeSpan.FromDays(7);

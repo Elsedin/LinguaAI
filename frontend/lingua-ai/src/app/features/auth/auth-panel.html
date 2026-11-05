@@ -1,0 +1,62 @@
+<section class="auth" aria-label="Account">
+  @if (currentUser(); as user) {
+    <p class="auth__who">Signed in as <strong>{{ user.email }}</strong></p>
+    <button type="button" class="auth__logout" (click)="logout()" [disabled]="loading()">
+      {{ loading() ? 'Working…' : 'Log out' }}
+    </button>
+  } @else {
+    <div class="auth__tabs" role="tablist">
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="mode() === 'login'"
+        [class.auth__tab--active]="mode() === 'login'"
+        (click)="setMode('login')"
+      >
+        Log in
+      </button>
+      <button
+        type="button"
+        role="tab"
+        [attr.aria-selected]="mode() === 'register'"
+        [class.auth__tab--active]="mode() === 'register'"
+        (click)="setMode('register')"
+      >
+        Register
+      </button>
+    </div>
+
+    <form class="auth__form" (ngSubmit)="submit()">
+      <label class="auth__field">
+        <span>Email</span>
+        <input
+          type="email"
+          name="email"
+          autocomplete="email"
+          required
+          [ngModel]="email()"
+          (ngModelChange)="email.set($event)"
+        />
+      </label>
+      <label class="auth__field">
+        <span>Password</span>
+        <input
+          type="password"
+          name="password"
+          autocomplete="current-password"
+          required
+          minlength="8"
+          [ngModel]="password()"
+          (ngModelChange)="password.set($event)"
+        />
+      </label>
+      <button type="submit" class="auth__submit" [disabled]="loading()">
+        {{ loading() ? 'Working…' : mode() === 'login' ? 'Log in' : 'Create account' }}
+      </button>
+    </form>
+  }
+
+  @if (error()) {
+    <p class="auth__error" role="alert">{{ error() }}</p>
+  }
+</section>
