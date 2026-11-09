@@ -10,11 +10,13 @@ export class TranslationService {
   private readonly url = `${API_BASE_URL}/api/translations`;
 
   translate(request: TranslateRequest): Observable<TranslateResponse> {
-    return this.http.post<TranslateResponse>(this.url, request).pipe(
-      catchError((error: HttpErrorResponse) =>
-        throwError(() => new Error(this.readErrorMessage(error))),
-      ),
-    );
+    return this.http
+      .post<TranslateResponse>(this.url, request, { withCredentials: true })
+      .pipe(
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => new Error(this.readErrorMessage(error))),
+        ),
+      );
   }
 
   private readErrorMessage(error: HttpErrorResponse): string {
