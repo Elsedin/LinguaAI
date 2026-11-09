@@ -43,6 +43,53 @@ public class HistoryServiceTests
         Assert.Equal(2, result.PageSize);
     }
 
+    [Fact]
+    public async Task ListAsync_filters_by_search_text()
+    {
+        await using var db = CreateDb();
+        db.TranslationHistories.AddRange(
+            CreateRow("user-a", "Good morning", translatedText: "Dobro jutro"),
+            CreateRow("user-a", "Good night", translatedText: "Laku noc"),
+            CreateRow("user-a", "Airport", translatedText: "Aerodrom"));
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var result = await service.ListAsync("user-a", new HistoryQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            Search = "good"
+        });
+
+        Assert.Equal(2, result.TotalCount);
+        Assert.All(result.Items, item => Assert.Contains("Good", item.SourceText, StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task ListAsync_filters_by_language_and_favorites()
+    {
+        await using var db = CreateDb();
+        db.TranslationHistories.AddRange(
+            CreateRow("user-a", "One", sourceLanguage: "en", targetLanguage: "bs", isFavorite: true),
+            CreateRow("user-a", "Two", sourceLanguage: "en", targetLanguage: "de", isFavorite: true),
+            CreateRow("user-a", "Three", sourceLanguage: "en", targetLanguage: "bs", isFavorite: false));
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var result = await service.ListAsync("user-a", new HistoryQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SourceLanguage = "en",
+            TargetLanguage = "bs",
+            FavoritesOnly = true
+        });
+
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal("One", result.Items[0].SourceText);
+        Assert.True(result.Items[0].IsFavorite);
+    }
+
     private static AppDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
@@ -51,17 +98,23 @@ public class HistoryServiceTests
         return new AppDbContext(options);
     }
 
-    private static TranslationHistory CreateRow(string userId, string sourceText) => new()
+    private static TranslationHistory CreateRow(
+        string userId,
+        string sourceText,
+        string translatedText = "translated",
+        string sourceLanguage = "en",
+        string targetLanguage = "bs",
+        bool isFavorite = false) => new()
     {
         Id = Guid.NewGuid(),
         UserId = userId,
         SourceText = sourceText,
-        TranslatedText = "translated",
-        SourceLanguage = "en",
-        TargetLanguage = "bs",
+        TranslatedText = translatedText,
+        SourceLanguage = sourceLanguage,
+        TargetLanguage = targetLanguage,
         Style = "natural",
         OperationType = "translation",
-        IsFavorite = false,
+        IsFavorite = isFavorite,
         CreatedAtUtc = DateTime.UtcNow
     };
 }

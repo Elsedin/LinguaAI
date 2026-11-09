@@ -33,9 +33,9 @@ public sealed class HistoryService(AppDbContext db) : IHistoryService
     {
         var page = Math.Max(1, query.Page);
         var pageSize = Math.Clamp(query.PageSize, 1, 50);
-        var owned = db.TranslationHistories.Where(x => x.UserId == userId);
-        var total = await owned.CountAsync(cancellationToken);
-        var items = await owned
+        var filtered = ApplyFilters(db.TranslationHistories.Where(x => x.UserId == userId), query);
+        var total = await filtered.CountAsync(cancellationToken);
+        var items = await filtered
             .OrderByDescending(x => x.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -60,5 +60,35 @@ public sealed class HistoryService(AppDbContext db) : IHistoryService
             PageSize = pageSize,
             TotalCount = total
         };
+    }
+
+    private static IQueryable<TranslationHistory> ApplyFilters(
+        IQueryable<TranslationHistory> rows,
+        HistoryQuery query)
+    {
+        var search = query.Search?.Trim();
+        if (!string.IsNullOrEmpty(search))
+        {
+            if (search.Length > 200)
+                search = search[..200];
+
+            var term = search.ToLowerInvariant();
+            rows = rows.Where(x =>
+                x.SourceText.ToLower().Contains(term) ||
+                x.TranslatedText.ToLower().Contains(term));
+        }
+
+        var sourceLanguage = query.SourceLanguage?.Trim();
+        if (!string.IsNullOrEmpty(sourceLanguage))
+            rows = rows.Where(x => x.SourceLanguage == sourceLanguage);
+
+        var targetLanguage = query.TargetLanguage?.Trim();
+        if (!string.IsNullOrEmpty(targetLanguage))
+            rows = rows.Where(x => x.TargetLanguage == targetLanguage);
+
+        if (query.FavoritesOnly == true)
+            rows = rows.Where(x => x.IsFavorite);
+
+        return rows;
     }
 }
