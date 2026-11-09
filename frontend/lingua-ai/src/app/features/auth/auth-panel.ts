@@ -1,10 +1,11 @@
 import { Component, inject, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { AuthService } from './auth.service';
 
 @Component({
   selector: 'app-auth-panel',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   templateUrl: './auth-panel.html',
   styleUrl: './auth-panel.scss',
 })

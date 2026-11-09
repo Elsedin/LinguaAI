@@ -1,9 +1,15 @@
 <section class="auth" aria-label="Account">
   @if (currentUser(); as user) {
-    <p class="auth__who">Signed in as <strong>{{ user.email }}</strong></p>
-    <button type="button" class="auth__logout" (click)="logout()" [disabled]="loading()">
-      {{ loading() ? 'Working…' : 'Log out' }}
-    </button>
+    <div class="auth__row">
+      <p class="auth__who">Signed in as <strong>{{ user.email }}</strong></p>
+      <nav class="auth__nav" aria-label="Account pages">
+        <a routerLink="/">Translate</a>
+        <a routerLink="/history">History</a>
+      </nav>
+      <button type="button" class="auth__logout" (click)="logout()" [disabled]="loading()">
+        {{ loading() ? 'Working…' : 'Log out' }}
+      </button>
+    </div>
   } @else {
     <div class="auth__tabs" role="tablist">
       <button

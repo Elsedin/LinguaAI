@@ -1,0 +1,54 @@
+<section class="history" aria-labelledby="history-title">
+  <header class="history__intro">
+    <p class="history__eyebrow">Your account</p>
+    <h1 id="history-title" class="history__title">Translation history</h1>
+    <p class="history__lead">
+      Saved translations from sessions when you are signed in.
+    </p>
+    <a routerLink="/" class="history__back">← Back to translator</a>
+  </header>
+
+  @if (!currentUser()) {
+    <p class="history__hint" role="status">
+      Log in above to see your history.
+    </p>
+  } @else if (loading()) {
+    <p class="history__hint">Loading…</p>
+  } @else if (error()) {
+    <p class="history__error" role="alert">{{ error() }}</p>
+  } @else if (items().length === 0) {
+    <p class="history__hint">
+      No saved translations yet. Translate something while signed in, then refresh this page.
+    </p>
+  } @else {
+    <ul class="history__list">
+      @for (item of items(); track item.id) {
+        <li class="history__item">
+          <div class="history__meta">
+            <span>{{ item.sourceLanguage }} → {{ item.targetLanguage }}</span>
+            <span>{{ item.style }}</span>
+            <time [attr.datetime]="item.createdAtUtc">
+              {{ item.createdAtUtc | date: 'medium' }}
+            </time>
+          </div>
+          <p class="history__source">{{ item.sourceText }}</p>
+          <p class="history__translated">{{ item.translatedText }}</p>
+        </li>
+      }
+    </ul>
+
+    <div class="history__pager">
+      <button type="button" (click)="previousPage()" [disabled]="page() <= 1 || loading()">
+        Previous
+      </button>
+      <span>Page {{ page() }} of {{ totalPages() }} · {{ totalCount() }} total</span>
+      <button
+        type="button"
+        (click)="nextPage()"
+        [disabled]="page() >= totalPages() || loading()"
+      >
+        Next
+      </button>
+    </div>
+  }
+</section>
