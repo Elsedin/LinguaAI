@@ -16,3 +16,10 @@ export interface PagedHistory {
   pageSize: number;
   totalCount: number;
 }
+
+export interface HistoryListQuery {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  favoritesOnly?: boolean;
+}

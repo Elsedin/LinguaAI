@@ -12,43 +12,82 @@
     <p class="history__hint" role="status">
       Log in above to see your history.
     </p>
-  } @else if (loading()) {
-    <p class="history__hint">Loading…</p>
-  } @else if (error()) {
-    <p class="history__error" role="alert">{{ error() }}</p>
-  } @else if (items().length === 0) {
-    <p class="history__hint">
-      No saved translations yet. Translate something while signed in, then refresh this page.
-    </p>
   } @else {
-    <ul class="history__list">
-      @for (item of items(); track item.id) {
-        <li class="history__item">
-          <div class="history__meta">
-            <span>{{ item.sourceLanguage }} → {{ item.targetLanguage }}</span>
-            <span>{{ item.style }}</span>
-            <time [attr.datetime]="item.createdAtUtc">
-              {{ item.createdAtUtc | date: 'medium' }}
-            </time>
-          </div>
-          <p class="history__source">{{ item.sourceText }}</p>
-          <p class="history__translated">{{ item.translatedText }}</p>
-        </li>
-      }
-    </ul>
+    <form class="history__filters" (ngSubmit)="applyFilters()">
+      <label class="history__search">
+        <span>Search</span>
+        <input
+          type="search"
+          name="search"
+          placeholder="Search source or translation…"
+          [ngModel]="searchDraft()"
+          (ngModelChange)="searchDraft.set($event)"
+        />
+      </label>
 
-    <div class="history__pager">
-      <button type="button" (click)="previousPage()" [disabled]="page() <= 1 || loading()">
-        Previous
-      </button>
-      <span>Page {{ page() }} of {{ totalPages() }} · {{ totalCount() }} total</span>
-      <button
-        type="button"
-        (click)="nextPage()"
-        [disabled]="page() >= totalPages() || loading()"
-      >
-        Next
-      </button>
-    </div>
+      <label class="history__favorite">
+        <input
+          type="checkbox"
+          name="favoritesOnly"
+          [ngModel]="favoritesOnly()"
+          (ngModelChange)="favoritesOnly.set($event)"
+        />
+        <span>Favorites only</span>
+      </label>
+
+      <button type="submit" class="history__apply" [disabled]="loading()">Search</button>
+      @if (hasActiveFilters()) {
+        <button type="button" class="history__clear" (click)="clearFilters()" [disabled]="loading()">
+          Clear
+        </button>
+      }
+    </form>
+
+    @if (loading()) {
+      <p class="history__hint">Loading…</p>
+    } @else if (error()) {
+      <p class="history__error" role="alert">{{ error() }}</p>
+    } @else if (items().length === 0) {
+      <p class="history__hint">
+        @if (hasActiveFilters()) {
+          No translations match your filters.
+        } @else {
+          No saved translations yet. Translate something while signed in, then open History again.
+        }
+      </p>
+    } @else {
+      <ul class="history__list">
+        @for (item of items(); track item.id) {
+          <li class="history__item">
+            <div class="history__meta">
+              <span>{{ item.sourceLanguage }} → {{ item.targetLanguage }}</span>
+              <span>{{ item.style }}</span>
+              @if (item.isFavorite) {
+                <span class="history__badge">Favorite</span>
+              }
+              <time [attr.datetime]="item.createdAtUtc">
+                {{ item.createdAtUtc | date: 'medium' }}
+              </time>
+            </div>
+            <p class="history__source">{{ item.sourceText }}</p>
+            <p class="history__translated">{{ item.translatedText }}</p>
+          </li>
+        }
+      </ul>
+
+      <div class="history__pager">
+        <button type="button" (click)="previousPage()" [disabled]="page() <= 1 || loading()">
+          Previous
+        </button>
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ totalCount() }} total</span>
+        <button
+          type="button"
+          (click)="nextPage()"
+          [disabled]="page() >= totalPages() || loading()"
+        >
+          Next
+        </button>
+      </div>
+    }
   }
 </section>

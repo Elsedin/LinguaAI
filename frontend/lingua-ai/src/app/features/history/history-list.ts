@@ -1,5 +1,6 @@
 import { DatePipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { AuthService } from '../auth/auth.service';
 import { HistoryItem } from './history.models';
@@ -7,7 +8,7 @@ import { HistoryService } from './history.service';
 
 @Component({
   selector: 'app-history-list',
-  imports: [DatePipe, RouterLink],
+  imports: [DatePipe, FormsModule, RouterLink],
   templateUrl: './history-list.html',
   styleUrl: './history-list.scss',
 })
@@ -22,8 +23,14 @@ export class HistoryList implements OnInit {
   protected readonly totalCount = signal(0);
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
+  protected readonly searchDraft = signal('');
+  protected readonly activeSearch = signal('');
+  protected readonly favoritesOnly = signal(false);
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize)),
+  );
+  protected readonly hasActiveFilters = computed(
+    () => this.activeSearch().length > 0 || this.favoritesOnly(),
   );
 
   ngOnInit(): void {
@@ -42,22 +49,41 @@ export class HistoryList implements OnInit {
     });
   }
 
+  protected applyFilters(): void {
+    this.activeSearch.set(this.searchDraft().trim());
+    this.load(1);
+  }
+
+  protected clearFilters(): void {
+    this.searchDraft.set('');
+    this.activeSearch.set('');
+    this.favoritesOnly.set(false);
+    this.load(1);
+  }
+
   protected load(page = this.page()): void {
     this.loading.set(true);
     this.error.set(null);
     this.page.set(page);
 
-    this.history.list(page, this.pageSize).subscribe({
-      next: (result) => {
-        this.items.set(result.items);
-        this.totalCount.set(result.totalCount);
-        this.loading.set(false);
-      },
-      error: (err: Error) => {
-        this.error.set(err.message);
-        this.loading.set(false);
-      },
-    });
+    this.history
+      .list({
+        page,
+        pageSize: this.pageSize,
+        search: this.activeSearch(),
+        favoritesOnly: this.favoritesOnly(),
+      })
+      .subscribe({
+        next: (result) => {
+          this.items.set(result.items);
+          this.totalCount.set(result.totalCount);
+          this.loading.set(false);
+        },
+        error: (err: Error) => {
+          this.error.set(err.message);
+          this.loading.set(false);
+        },
+      });
   }
 
   protected previousPage(): void {

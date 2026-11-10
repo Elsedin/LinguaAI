@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../core/api.config';
-import { PagedHistory } from './history.models';
+import { HistoryListQuery, PagedHistory } from './history.models';
 
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
@@ -10,10 +10,19 @@ export class HistoryService {
   private readonly url = `${API_BASE_URL}/api/history`;
   private readonly credentials = { withCredentials: true };
 
-  list(page = 1, pageSize = 20): Observable<PagedHistory> {
-    const params = new HttpParams()
-      .set('page', page)
-      .set('pageSize', pageSize);
+  list(query: HistoryListQuery = {}): Observable<PagedHistory> {
+    let params = new HttpParams()
+      .set('page', query.page ?? 1)
+      .set('pageSize', query.pageSize ?? 20);
+
+    const search = query.search?.trim();
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    if (query.favoritesOnly) {
+      params = params.set('favoritesOnly', 'true');
+    }
 
     return this.http.get<PagedHistory>(this.url, { ...this.credentials, params }).pipe(
       catchError((error: HttpErrorResponse) =>
