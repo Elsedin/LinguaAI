@@ -2,7 +2,7 @@ import { HttpClient, HttpErrorResponse, HttpParams } from '@angular/common/http'
 import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../core/api.config';
-import { HistoryListQuery, PagedHistory } from './history.models';
+import { HistoryItem, HistoryListQuery, PagedHistory } from './history.models';
 
 @Injectable({ providedIn: 'root' })
 export class HistoryService {
@@ -26,12 +26,22 @@ export class HistoryService {
 
     return this.http.get<PagedHistory>(this.url, { ...this.credentials, params }).pipe(
       catchError((error: HttpErrorResponse) =>
-        throwError(() => new Error(this.readError(error))),
+        throwError(() => new Error(this.readError(error, 'Could not load history.'))),
       ),
     );
   }
 
-  private readError(error: HttpErrorResponse): string {
+  toggleFavorite(id: string): Observable<HistoryItem> {
+    return this.http
+      .post<HistoryItem>(`${this.url}/${id}/favorite`, {}, this.credentials)
+      .pipe(
+        catchError((error: HttpErrorResponse) =>
+          throwError(() => new Error(this.readError(error, 'Could not update favorite.'))),
+        ),
+      );
+  }
+
+  private readError(error: HttpErrorResponse, fallback: string): string {
     const detail = error.error?.detail;
     if (typeof detail === 'string' && detail.trim().length > 0) {
       return detail;
@@ -45,6 +55,10 @@ export class HistoryService {
       return 'Please log in to view your translation history.';
     }
 
-    return error.message || 'Could not load history.';
+    if (error.status === 404) {
+      return 'That history item was not found.';
+    }
+
+    return error.message || fallback;
   }
 }

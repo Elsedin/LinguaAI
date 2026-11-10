@@ -49,4 +49,9 @@ public interface IHistoryService
         string userId,
         HistoryQuery query,
         CancellationToken cancellationToken = default);
+
+    Task<HistoryItemDto?> ToggleFavoriteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default);
 }

@@ -118,8 +118,30 @@
   cursor: not-allowed;
 }
 
-.history__badge {
+.history__favorite-btn {
+  margin-left: auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.history__favorite-btn--on {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, white);
   color: var(--accent-strong);
+}
+
+.history__favorite-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .history__hint,
