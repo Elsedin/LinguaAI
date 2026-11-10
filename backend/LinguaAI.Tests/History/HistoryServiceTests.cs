@@ -90,6 +90,39 @@ public class HistoryServiceTests
         Assert.True(result.Items[0].IsFavorite);
     }
 
+    [Fact]
+    public async Task ToggleFavoriteAsync_flips_owned_row()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-a", "Hello", isFavorite: false);
+        db.TranslationHistories.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var first = await service.ToggleFavoriteAsync("user-a", row.Id);
+        var second = await service.ToggleFavoriteAsync("user-a", row.Id);
+
+        Assert.NotNull(first);
+        Assert.True(first.IsFavorite);
+        Assert.NotNull(second);
+        Assert.False(second.IsFavorite);
+    }
+
+    [Fact]
+    public async Task ToggleFavoriteAsync_returns_null_for_other_users_row()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-b", "Secret");
+        db.TranslationHistories.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var result = await service.ToggleFavoriteAsync("user-a", row.Id);
+
+        Assert.Null(result);
+        Assert.False((await db.TranslationHistories.SingleAsync()).IsFavorite);
+    }
+
     private static AppDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()

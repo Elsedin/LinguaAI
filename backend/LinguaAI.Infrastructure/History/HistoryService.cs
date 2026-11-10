@@ -62,6 +62,34 @@ public sealed class HistoryService(AppDbContext db) : IHistoryService
         };
     }
 
+    public async Task<HistoryItemDto?> ToggleFavoriteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var row = await db.TranslationHistories
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
+
+        if (row is null)
+            return null;
+
+        row.IsFavorite = !row.IsFavorite;
+        await db.SaveChangesAsync(cancellationToken);
+
+        return new HistoryItemDto
+        {
+            Id = row.Id,
+            SourceText = row.SourceText,
+            TranslatedText = row.TranslatedText,
+            SourceLanguage = row.SourceLanguage,
+            TargetLanguage = row.TargetLanguage,
+            Style = row.Style,
+            OperationType = row.OperationType,
+            IsFavorite = row.IsFavorite,
+            CreatedAtUtc = row.CreatedAtUtc
+        };
+    }
+
     private static IQueryable<TranslationHistory> ApplyFilters(
         IQueryable<TranslationHistory> rows,
         HistoryQuery query)

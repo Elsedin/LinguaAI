@@ -26,6 +26,7 @@ export class HistoryList implements OnInit {
   protected readonly searchDraft = signal('');
   protected readonly activeSearch = signal('');
   protected readonly favoritesOnly = signal(false);
+  protected readonly togglingId = signal<string | null>(null);
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize)),
   );
@@ -96,5 +97,32 @@ export class HistoryList implements OnInit {
     if (this.page() < this.totalPages()) {
       this.load(this.page() + 1);
     }
+  }
+
+  protected toggleFavorite(item: HistoryItem): void {
+    if (this.togglingId() !== null) {
+      return;
+    }
+
+    this.togglingId.set(item.id);
+    this.error.set(null);
+
+    this.history.toggleFavorite(item.id).subscribe({
+      next: (updated) => {
+        if (this.favoritesOnly() && !updated.isFavorite) {
+          this.items.update((rows) => rows.filter((row) => row.id !== updated.id));
+          this.totalCount.update((count) => Math.max(0, count - 1));
+        } else {
+          this.items.update((rows) =>
+            rows.map((row) => (row.id === updated.id ? updated : row)),
+          );
+        }
+        this.togglingId.set(null);
+      },
+      error: (err: Error) => {
+        this.error.set(err.message);
+        this.togglingId.set(null);
+      },
+    });
   }
 }

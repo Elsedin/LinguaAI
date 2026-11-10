@@ -43,10 +43,12 @@
       }
     </form>
 
+    @if (error()) {
+      <p class="history__error" role="alert">{{ error() }}</p>
+    }
+
     @if (loading()) {
       <p class="history__hint">Loading…</p>
-    } @else if (error()) {
-      <p class="history__error" role="alert">{{ error() }}</p>
     } @else if (items().length === 0) {
       <p class="history__hint">
         @if (hasActiveFilters()) {
@@ -62,12 +64,18 @@
             <div class="history__meta">
               <span>{{ item.sourceLanguage }} → {{ item.targetLanguage }}</span>
               <span>{{ item.style }}</span>
-              @if (item.isFavorite) {
-                <span class="history__badge">Favorite</span>
-              }
               <time [attr.datetime]="item.createdAtUtc">
                 {{ item.createdAtUtc | date: 'medium' }}
               </time>
+              <button
+                type="button"
+                class="history__favorite-btn"
+                [class.history__favorite-btn--on]="item.isFavorite"
+                [disabled]="togglingId() !== null"
+                (click)="toggleFavorite(item)"
+              >
+                {{ item.isFavorite ? 'Favorited' : 'Favorite' }}
+              </button>
             </div>
             <p class="history__source">{{ item.sourceText }}</p>
             <p class="history__translated">{{ item.translatedText }}</p>
