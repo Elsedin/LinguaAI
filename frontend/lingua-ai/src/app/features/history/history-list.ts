@@ -26,7 +26,7 @@ export class HistoryList implements OnInit {
   protected readonly searchDraft = signal('');
   protected readonly activeSearch = signal('');
   protected readonly favoritesOnly = signal(false);
-  protected readonly togglingId = signal<string | null>(null);
+  protected readonly busyId = signal<string | null>(null);
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize)),
   );
@@ -100,29 +100,61 @@ export class HistoryList implements OnInit {
   }
 
   protected toggleFavorite(item: HistoryItem): void {
-    if (this.togglingId() !== null) {
+    if (this.busyId() !== null) {
       return;
     }
 
-    this.togglingId.set(item.id);
+    this.busyId.set(item.id);
     this.error.set(null);
 
     this.history.toggleFavorite(item.id).subscribe({
       next: (updated) => {
         if (this.favoritesOnly() && !updated.isFavorite) {
-          this.items.update((rows) => rows.filter((row) => row.id !== updated.id));
-          this.totalCount.update((count) => Math.max(0, count - 1));
+          this.removeLocalItem(updated.id);
         } else {
           this.items.update((rows) =>
             rows.map((row) => (row.id === updated.id ? updated : row)),
           );
         }
-        this.togglingId.set(null);
+        this.busyId.set(null);
       },
       error: (err: Error) => {
         this.error.set(err.message);
-        this.togglingId.set(null);
+        this.busyId.set(null);
       },
     });
+  }
+
+  protected deleteItem(item: HistoryItem): void {
+    if (this.busyId() !== null) {
+      return;
+    }
+
+    if (!window.confirm('Delete this translation from your history?')) {
+      return;
+    }
+
+    this.busyId.set(item.id);
+    this.error.set(null);
+
+    this.history.delete(item.id).subscribe({
+      next: () => {
+        this.removeLocalItem(item.id);
+        this.busyId.set(null);
+
+        if (this.items().length === 0 && this.page() > 1) {
+          this.load(this.page() - 1);
+        }
+      },
+      error: (err: Error) => {
+        this.error.set(err.message);
+        this.busyId.set(null);
+      },
+    });
+  }
+
+  private removeLocalItem(id: string): void {
+    this.items.update((rows) => rows.filter((row) => row.id !== id));
+    this.totalCount.update((count) => Math.max(0, count - 1));
   }
 }

@@ -90,6 +90,22 @@ public sealed class HistoryService(AppDbContext db) : IHistoryService
         };
     }
 
+    public async Task<bool> DeleteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var row = await db.TranslationHistories
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
+
+        if (row is null)
+            return false;
+
+        db.TranslationHistories.Remove(row);
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static IQueryable<TranslationHistory> ApplyFilters(
         IQueryable<TranslationHistory> rows,
         HistoryQuery query)

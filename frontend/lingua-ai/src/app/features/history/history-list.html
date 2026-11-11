@@ -67,15 +67,25 @@
               <time [attr.datetime]="item.createdAtUtc">
                 {{ item.createdAtUtc | date: 'medium' }}
               </time>
-              <button
-                type="button"
-                class="history__favorite-btn"
-                [class.history__favorite-btn--on]="item.isFavorite"
-                [disabled]="togglingId() !== null"
-                (click)="toggleFavorite(item)"
-              >
-                {{ item.isFavorite ? 'Favorited' : 'Favorite' }}
-              </button>
+              <div class="history__actions">
+                <button
+                  type="button"
+                  class="history__favorite-btn"
+                  [class.history__favorite-btn--on]="item.isFavorite"
+                  [disabled]="busyId() !== null"
+                  (click)="toggleFavorite(item)"
+                >
+                  {{ item.isFavorite ? 'Favorited' : 'Favorite' }}
+                </button>
+                <button
+                  type="button"
+                  class="history__delete-btn"
+                  [disabled]="busyId() !== null"
+                  (click)="deleteItem(item)"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
             <p class="history__source">{{ item.sourceText }}</p>
             <p class="history__translated">{{ item.translatedText }}</p>

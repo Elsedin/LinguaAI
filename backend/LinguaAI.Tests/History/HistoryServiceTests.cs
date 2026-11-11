@@ -123,6 +123,36 @@ public class HistoryServiceTests
         Assert.False((await db.TranslationHistories.SingleAsync()).IsFavorite);
     }
 
+    [Fact]
+    public async Task DeleteAsync_removes_owned_row()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-a", "Delete me");
+        db.TranslationHistories.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var deleted = await service.DeleteAsync("user-a", row.Id);
+
+        Assert.True(deleted);
+        Assert.Empty(db.TranslationHistories);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_returns_false_for_other_users_row()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-b", "Keep me");
+        db.TranslationHistories.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new HistoryService(db);
+        var deleted = await service.DeleteAsync("user-a", row.Id);
+
+        Assert.False(deleted);
+        Assert.Single(db.TranslationHistories);
+    }
+
     private static AppDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
