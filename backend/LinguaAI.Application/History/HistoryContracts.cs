@@ -54,4 +54,9 @@ public interface IHistoryService
         string userId,
         Guid id,
         CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default);
 }

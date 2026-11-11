@@ -41,6 +41,14 @@ export class HistoryService {
       );
   }
 
+  delete(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.url}/${id}`, this.credentials).pipe(
+      catchError((error: HttpErrorResponse) =>
+        throwError(() => new Error(this.readError(error, 'Could not delete history item.'))),
+      ),
+    );
+  }
+
   private readError(error: HttpErrorResponse, fallback: string): string {
     const detail = error.error?.detail;
     if (typeof detail === 'string' && detail.trim().length > 0) {

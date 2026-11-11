@@ -118,8 +118,15 @@
   cursor: not-allowed;
 }
 
-.history__favorite-btn {
+.history__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-left: auto;
+}
+
+.history__favorite-btn,
+.history__delete-btn {
   min-height: 2rem;
   padding: 0.25rem 0.7rem;
   border: 1px solid var(--line);
@@ -139,7 +146,13 @@
   color: var(--accent-strong);
 }
 
-.history__favorite-btn:disabled {
+.history__delete-btn:hover:not(:disabled) {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.history__favorite-btn:disabled,
+.history__delete-btn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
