@@ -72,6 +72,22 @@ public class WritingServiceTests
         Assert.Equal("She go to school yesterday.", fake.LastCommand.Text);
     }
 
+    [Fact]
+    public async Task TransformAsync_accepts_simplify_operation()
+    {
+        var fake = new FakeWritingProvider();
+        var service = new WritingService(fake);
+
+        var result = await service.TransformAsync(new WritingRequest
+        {
+            Text = "The aforementioned methodology facilitates comprehension.",
+            Operation = "Simplify"
+        });
+
+        Assert.Equal("simplify", result.Operation);
+        Assert.Equal("simplify", fake.LastCommand!.Operation);
+    }
+
     private sealed class FakeWritingProvider : IWritingProvider
     {
         public WritingCommand? LastCommand { get; private set; }
