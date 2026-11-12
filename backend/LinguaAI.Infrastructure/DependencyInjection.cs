@@ -1,6 +1,7 @@
 using LinguaAI.Application.Abstractions;
 using LinguaAI.Application.History;
 using LinguaAI.Application.Translations;
+using LinguaAI.Application.Writing;
 using LinguaAI.Infrastructure.Ai;
 using LinguaAI.Infrastructure.Data;
 using LinguaAI.Infrastructure.History;
@@ -69,13 +70,16 @@ public static class DependencyInjection
         });
 
         services.AddScoped<ITranslationService, TranslationService>();
+        services.AddScoped<IWritingService, WritingService>();
         services.AddScoped<IHistoryService, HistoryService>();
-        services.AddHttpClient<ITranslationProvider, GeminiTranslationProvider>((sp, client) =>
+        services.AddHttpClient<GeminiTranslationProvider>((sp, client) =>
         {
             var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
             client.BaseAddress = new Uri(opts.BaseUrl);
             client.Timeout = TimeSpan.FromSeconds(Math.Clamp(opts.TimeoutSeconds, 5, 120));
         });
+        services.AddScoped<ITranslationProvider>(sp => sp.GetRequiredService<GeminiTranslationProvider>());
+        services.AddScoped<IWritingProvider>(sp => sp.GetRequiredService<GeminiTranslationProvider>());
 
         return services;
     }
