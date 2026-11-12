@@ -5,10 +5,12 @@ namespace LinguaAI.Application.Writing;
 public static class WritingOperations
 {
     public const string Rewrite = "rewrite";
+    public const string Grammar = "grammar";
 
     public static readonly IReadOnlySet<string> Supported = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
-        Rewrite
+        Rewrite,
+        Grammar
     };
 
     public static bool IsValid(string? operation) =>

@@ -143,6 +143,8 @@ public sealed class GeminiTranslationProvider(
         {
             WritingOperations.Rewrite =>
                 "Rewrite the following text to improve clarity and flow. Keep the same meaning and language. Do not add commentary.",
+            WritingOperations.Grammar =>
+                "Correct grammar, spelling, and punctuation in the following text. Keep the same meaning, language, and tone. Do not add commentary.",
             _ => throw new ArgumentException("Writing operation is not supported.")
         });
 

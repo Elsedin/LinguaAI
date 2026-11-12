@@ -48,11 +48,28 @@ public class WritingServiceTests
             Language = "EN"
         });
 
-        Assert.Equal("rewritten:Hello there", result.ResultText);
+        Assert.Equal("result:Hello there", result.ResultText);
         Assert.NotNull(fake.LastCommand);
         Assert.Equal("Hello there", fake.LastCommand!.Text);
         Assert.Equal("rewrite", fake.LastCommand.Operation);
         Assert.Equal("en", fake.LastCommand.Language);
+    }
+
+    [Fact]
+    public async Task TransformAsync_accepts_grammar_operation()
+    {
+        var fake = new FakeWritingProvider();
+        var service = new WritingService(fake);
+
+        var result = await service.TransformAsync(new WritingRequest
+        {
+            Text = "She go to school yesterday.",
+            Operation = "Grammar"
+        });
+
+        Assert.Equal("grammar", result.Operation);
+        Assert.Equal("grammar", fake.LastCommand!.Operation);
+        Assert.Equal("She go to school yesterday.", fake.LastCommand.Text);
     }
 
     private sealed class FakeWritingProvider : IWritingProvider
@@ -65,7 +82,7 @@ public class WritingServiceTests
         {
             LastCommand = command;
             return Task.FromResult(new WritingResult(
-                $"rewritten:{command.Text}",
+                $"result:{command.Text}",
                 command.Operation,
                 command.Language));
         }
