@@ -6,11 +6,13 @@ public static class WritingOperations
 {
     public const string Rewrite = "rewrite";
     public const string Grammar = "grammar";
+    public const string Simplify = "simplify";
 
     public static readonly IReadOnlySet<string> Supported = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         Rewrite,
-        Grammar
+        Grammar,
+        Simplify
     };
 
     public static bool IsValid(string? operation) =>
