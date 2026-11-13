@@ -1,0 +1,102 @@
+<section class="writing" aria-labelledby="writing-title">
+  <header class="writing__intro">
+    <p class="writing__eyebrow">AI writing</p>
+    <h1 id="writing-title" class="writing__title">Writing assistant</h1>
+    <p class="writing__lead">
+      {{ selectedOperation().description }}. Rewrite, fix grammar, or simplify — without leaving LinguaAI.
+    </p>
+    <a routerLink="/" class="writing__back">← Back to translator</a>
+  </header>
+
+  <form class="writing__form" (ngSubmit)="run()">
+    <div class="writing__toolbar">
+      <label class="field">
+        <span class="field__label">Operation</span>
+        <select
+          class="field__control"
+          name="operation"
+          [ngModel]="operation()"
+          (ngModelChange)="operation.set($event)"
+        >
+          @for (item of operations; track item.value) {
+            <option [value]="item.value">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span class="field__label">Language</span>
+        <select
+          class="field__control"
+          name="language"
+          [ngModel]="language()"
+          (ngModelChange)="language.set($event)"
+        >
+          @for (item of languages; track item.code) {
+            <option [value]="item.code">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+    </div>
+
+    <div class="writing__panels">
+      <div class="panel">
+        <div class="panel__meta">
+          <span>Input</span>
+          <span [class.panel__count--warn]="characterCount() > maxLength * 0.9">
+            {{ characterCount() }} / {{ maxLength }}
+          </span>
+        </div>
+        <textarea
+          class="panel__text"
+          name="sourceText"
+          rows="10"
+          [attr.maxlength]="maxLength"
+          placeholder="Paste or type text to improve…"
+          [ngModel]="sourceText()"
+          (ngModelChange)="sourceText.set($event)"
+        ></textarea>
+      </div>
+
+      <div class="panel panel--output" [class.panel--loading]="loading()">
+        <div class="panel__meta">
+          <span>Result</span>
+          <div class="panel__actions">
+            <button
+              type="button"
+              class="ghost"
+              (click)="useResultAsSource()"
+              [disabled]="!resultText()"
+            >
+              Use as input
+            </button>
+            <button type="button" class="ghost" (click)="copyResult()" [disabled]="!resultText()">
+              {{ copied() ? 'Copied' : 'Copy' }}
+            </button>
+            <button type="button" class="ghost" (click)="clearAll()">Clear</button>
+          </div>
+        </div>
+        <textarea
+          class="panel__text"
+          rows="10"
+          readonly
+          [value]="resultText()"
+          placeholder="{{ loading() ? 'Working…' : 'Result appears here' }}"
+        ></textarea>
+        @if (loading()) {
+          <div class="panel__spinner" aria-live="polite">Working…</div>
+        }
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="writing__error" role="alert">{{ error() }}</p>
+    }
+
+    <div class="writing__submit">
+      <button type="submit" class="primary" [disabled]="!canRun()">
+        {{ loading() ? 'Working…' : selectedOperation().label }}
+      </button>
+    </div>
+  </form>
+</section>
