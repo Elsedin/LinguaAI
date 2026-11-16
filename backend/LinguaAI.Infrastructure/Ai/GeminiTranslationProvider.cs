@@ -150,6 +150,8 @@ public sealed class GeminiTranslationProvider(
                 "Simplify the following text using shorter sentences and easier words. Keep the same meaning and language. Do not add commentary.",
             WritingOperations.Tone =>
                 $"Rewrite the following text in a {command.Tone} tone. Keep the same meaning and language. Do not add commentary.",
+            WritingOperations.Explain =>
+                "Explain the meaning of the following word or phrase clearly and briefly. Include a short usage note if helpful. Do not rewrite the text as a replacement; explain it.",
             _ => throw new ArgumentException("Writing operation is not supported.")
         });
 

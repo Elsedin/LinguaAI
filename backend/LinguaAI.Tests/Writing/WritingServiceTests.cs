@@ -122,6 +122,23 @@ public class WritingServiceTests
         Assert.Equal("friendly", fake.LastCommand!.Tone);
     }
 
+    [Fact]
+    public async Task TransformAsync_accepts_explain_operation()
+    {
+        var fake = new FakeWritingProvider();
+        var service = new WritingService(fake);
+
+        var result = await service.TransformAsync(new WritingRequest
+        {
+            Text = "break the ice",
+            Operation = "Explain"
+        });
+
+        Assert.Equal("explain", result.Operation);
+        Assert.Equal("explain", fake.LastCommand!.Operation);
+        Assert.Equal("break the ice", fake.LastCommand.Text);
+    }
+
     private sealed class FakeWritingProvider : IWritingProvider
     {
         public WritingCommand? LastCommand { get; private set; }

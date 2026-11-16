@@ -27,6 +27,11 @@ export const WRITING_OPERATIONS: WritingOperationOption[] = [
     label: 'Tone',
     description: 'Adjust the tone while keeping meaning',
   },
+  {
+    value: 'explain',
+    label: 'Explain',
+    description: 'Explain a word or phrase clearly',
+  },
 ];
 
 export interface ToneOption {
