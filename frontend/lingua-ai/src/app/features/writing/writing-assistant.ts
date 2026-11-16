@@ -5,6 +5,7 @@ import {
   MAX_WRITING_LENGTH,
   WRITING_LANGUAGES,
   WRITING_OPERATIONS,
+  WRITING_TONES,
 } from './writing.models';
 import { WritingService } from './writing.service';
 
@@ -19,17 +20,20 @@ export class WritingAssistant {
 
   protected readonly operations = WRITING_OPERATIONS;
   protected readonly languages = WRITING_LANGUAGES;
+  protected readonly tones = WRITING_TONES;
   protected readonly maxLength = MAX_WRITING_LENGTH;
 
   protected readonly sourceText = signal('');
   protected readonly resultText = signal('');
   protected readonly operation = signal('rewrite');
   protected readonly language = signal('');
+  protected readonly tone = signal('formal');
   protected readonly loading = signal(false);
   protected readonly error = signal<string | null>(null);
   protected readonly copied = signal(false);
 
   protected readonly characterCount = computed(() => this.sourceText().length);
+  protected readonly isToneOperation = computed(() => this.operation() === 'tone');
   protected readonly canRun = computed(
     () => this.sourceText().trim().length > 0 && !this.loading(),
   );
@@ -47,11 +51,13 @@ export class WritingAssistant {
     this.copied.set(false);
 
     const language = this.language().trim();
+    const isTone = this.isToneOperation();
     this.writing
       .transform({
         text: this.sourceText().trim(),
         operation: this.operation(),
         language: language.length > 0 ? language : null,
+        tone: isTone ? this.tone() : null,
       })
       .subscribe({
         next: (response) => {

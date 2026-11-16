@@ -32,10 +32,25 @@ public sealed class WritingService(IWritingProvider provider) : IWritingService
             language = rawLanguage.ToLowerInvariant();
         }
 
+        string? tone = null;
+        var isTone = string.Equals(operation, WritingOperations.Tone, StringComparison.OrdinalIgnoreCase);
+        var rawTone = request.Tone?.Trim();
+        if (isTone)
+        {
+            if (!WritingTones.IsValid(rawTone))
+                throw new ArgumentException("Tone is required for tone adjustment.");
+            tone = rawTone!.ToLowerInvariant();
+        }
+        else if (!string.IsNullOrEmpty(rawTone))
+        {
+            throw new ArgumentException("Tone is only allowed for the tone operation.");
+        }
+
         var command = new WritingCommand(
             text,
             operation.ToLowerInvariant(),
-            language);
+            language,
+            tone);
 
         return await provider.TransformAsync(command, cancellationToken);
     }

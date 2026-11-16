@@ -3,13 +3,13 @@
     <p class="writing__eyebrow">AI writing</p>
     <h1 id="writing-title" class="writing__title">Writing assistant</h1>
     <p class="writing__lead">
-      {{ selectedOperation().description }}. Rewrite, fix grammar, or simplify — without leaving LinguaAI.
+      {{ selectedOperation().description }}. Rewrite, fix grammar, simplify, or change tone.
     </p>
     <a routerLink="/" class="writing__back">← Back to translator</a>
   </header>
 
   <form class="writing__form" (ngSubmit)="run()">
-    <div class="writing__toolbar">
+    <div class="writing__toolbar" [class.writing__toolbar--tone]="isToneOperation()">
       <label class="field">
         <span class="field__label">Operation</span>
         <select
@@ -23,6 +23,22 @@
           }
         </select>
       </label>
+
+      @if (isToneOperation()) {
+        <label class="field">
+          <span class="field__label">Tone</span>
+          <select
+            class="field__control"
+            name="tone"
+            [ngModel]="tone()"
+            (ngModelChange)="tone.set($event)"
+          >
+            @for (item of tones; track item.value) {
+              <option [value]="item.value">{{ item.label }}</option>
+            }
+          </select>
+        </label>
+      }
 
       <label class="field">
         <span class="field__label">Language</span>

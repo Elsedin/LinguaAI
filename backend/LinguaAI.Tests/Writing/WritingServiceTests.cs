@@ -53,6 +53,7 @@ public class WritingServiceTests
         Assert.Equal("Hello there", fake.LastCommand!.Text);
         Assert.Equal("rewrite", fake.LastCommand.Operation);
         Assert.Equal("en", fake.LastCommand.Language);
+        Assert.Null(fake.LastCommand.Tone);
     }
 
     [Fact]
@@ -88,6 +89,39 @@ public class WritingServiceTests
         Assert.Equal("simplify", fake.LastCommand!.Operation);
     }
 
+    [Fact]
+    public async Task TransformAsync_requires_tone_for_tone_operation()
+    {
+        var service = new WritingService(new FakeWritingProvider());
+
+        var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
+            service.TransformAsync(new WritingRequest
+            {
+                Text = "Please send the report.",
+                Operation = WritingOperations.Tone
+            }));
+
+        Assert.Contains("Tone is required", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task TransformAsync_accepts_tone_operation_with_tone()
+    {
+        var fake = new FakeWritingProvider();
+        var service = new WritingService(fake);
+
+        var result = await service.TransformAsync(new WritingRequest
+        {
+            Text = "Please send the report.",
+            Operation = "Tone",
+            Tone = "Friendly"
+        });
+
+        Assert.Equal("tone", result.Operation);
+        Assert.Equal("friendly", result.Tone);
+        Assert.Equal("friendly", fake.LastCommand!.Tone);
+    }
+
     private sealed class FakeWritingProvider : IWritingProvider
     {
         public WritingCommand? LastCommand { get; private set; }
@@ -100,7 +134,8 @@ public class WritingServiceTests
             return Task.FromResult(new WritingResult(
                 $"result:{command.Text}",
                 command.Operation,
-                command.Language));
+                command.Language,
+                command.Tone));
         }
     }
 }

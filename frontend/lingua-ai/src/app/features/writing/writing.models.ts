@@ -22,6 +22,24 @@ export const WRITING_OPERATIONS: WritingOperationOption[] = [
     label: 'Simplify',
     description: 'Shorter sentences, easier words',
   },
+  {
+    value: 'tone',
+    label: 'Tone',
+    description: 'Adjust the tone while keeping meaning',
+  },
+];
+
+export interface ToneOption {
+  value: string;
+  label: string;
+}
+
+export const WRITING_TONES: ToneOption[] = [
+  { value: 'formal', label: 'Formal' },
+  { value: 'informal', label: 'Informal' },
+  { value: 'professional', label: 'Professional' },
+  { value: 'friendly', label: 'Friendly' },
+  { value: 'confident', label: 'Confident' },
 ];
 
 export interface LanguageOption {
@@ -45,10 +63,12 @@ export interface WritingRequest {
   text: string;
   operation: string;
   language?: string | null;
+  tone?: string | null;
 }
 
 export interface WritingResponse {
   resultText: string;
   operation: string;
   language?: string | null;
+  tone?: string | null;
 }

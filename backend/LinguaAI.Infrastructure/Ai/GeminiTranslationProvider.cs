@@ -60,7 +60,8 @@ public sealed class GeminiTranslationProvider(
         return new WritingResult(
             parsed.ResultText.Trim(),
             command.Operation,
-            command.Language);
+            command.Language,
+            command.Tone);
     }
 
     private async Task<string> GenerateJsonAsync(
@@ -147,6 +148,8 @@ public sealed class GeminiTranslationProvider(
                 "Correct grammar, spelling, and punctuation in the following text. Keep the same meaning, language, and tone. Do not add commentary.",
             WritingOperations.Simplify =>
                 "Simplify the following text using shorter sentences and easier words. Keep the same meaning and language. Do not add commentary.",
+            WritingOperations.Tone =>
+                $"Rewrite the following text in a {command.Tone} tone. Keep the same meaning and language. Do not add commentary.",
             _ => throw new ArgumentException("Writing operation is not supported.")
         });
 
