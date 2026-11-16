@@ -8,13 +8,15 @@ public static class WritingOperations
     public const string Grammar = "grammar";
     public const string Simplify = "simplify";
     public const string Tone = "tone";
+    public const string Explain = "explain";
 
     public static readonly IReadOnlySet<string> Supported = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
     {
         Rewrite,
         Grammar,
         Simplify,
-        Tone
+        Tone,
+        Explain
     };
 
     public static bool IsValid(string? operation) =>
