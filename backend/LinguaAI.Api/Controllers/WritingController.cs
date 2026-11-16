@@ -24,7 +24,8 @@ public class WritingController(IWritingService writingService) : ControllerBase
         {
             ResultText = result.ResultText,
             Operation = result.Operation,
-            Language = result.Language
+            Language = result.Language,
+            Tone = result.Tone
         });
     }
 }

@@ -63,6 +63,10 @@
   align-items: end;
 }
 
+.writing__toolbar--tone {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+
 .field {
   display: grid;
   gap: 0.35rem;
@@ -247,6 +251,7 @@
 
 @media (max-width: 860px) {
   .writing__toolbar,
+  .writing__toolbar--tone,
   .writing__panels {
     grid-template-columns: 1fr;
   }
