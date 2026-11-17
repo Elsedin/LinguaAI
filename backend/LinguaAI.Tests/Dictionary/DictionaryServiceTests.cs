@@ -70,6 +70,36 @@ public class DictionaryServiceTests
         Assert.Contains("Target language", ex.Message, StringComparison.OrdinalIgnoreCase);
     }
 
+    [Fact]
+    public async Task DeleteAsync_removes_owned_entry()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-a", "delete-me");
+        db.DictionaryEntries.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var deleted = await service.DeleteAsync("user-a", row.Id);
+
+        Assert.True(deleted);
+        Assert.Empty(db.DictionaryEntries);
+    }
+
+    [Fact]
+    public async Task DeleteAsync_returns_false_for_other_users_entry()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-b", "keep-me");
+        db.DictionaryEntries.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var deleted = await service.DeleteAsync("user-a", row.Id);
+
+        Assert.False(deleted);
+        Assert.Single(db.DictionaryEntries);
+    }
+
     private static AppDbContext CreateDb()
     {
         var options = new DbContextOptionsBuilder<AppDbContext>()
