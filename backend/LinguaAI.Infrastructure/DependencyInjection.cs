@@ -1,9 +1,11 @@
 using LinguaAI.Application.Abstractions;
+using LinguaAI.Application.Dictionary;
 using LinguaAI.Application.History;
 using LinguaAI.Application.Translations;
 using LinguaAI.Application.Writing;
 using LinguaAI.Infrastructure.Ai;
 using LinguaAI.Infrastructure.Data;
+using LinguaAI.Infrastructure.Dictionary;
 using LinguaAI.Infrastructure.History;
 using LinguaAI.Infrastructure.Identity;
 using Microsoft.AspNetCore.Http;
@@ -72,6 +74,7 @@ public static class DependencyInjection
         services.AddScoped<ITranslationService, TranslationService>();
         services.AddScoped<IWritingService, WritingService>();
         services.AddScoped<IHistoryService, HistoryService>();
+        services.AddScoped<IDictionaryService, DictionaryService>();
         services.AddHttpClient<GeminiTranslationProvider>((sp, client) =>
         {
             var opts = sp.GetRequiredService<IOptions<GeminiOptions>>().Value;
