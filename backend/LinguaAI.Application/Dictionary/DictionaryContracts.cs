@@ -66,4 +66,9 @@ public interface IDictionaryService
         string userId,
         DictionaryQuery query,
         CancellationToken cancellationToken = default);
+
+    Task<bool> DeleteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default);
 }

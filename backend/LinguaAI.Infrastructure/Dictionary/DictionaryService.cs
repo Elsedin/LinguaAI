@@ -83,6 +83,22 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
         };
     }
 
+    public async Task<bool> DeleteAsync(
+        string userId,
+        Guid id,
+        CancellationToken cancellationToken = default)
+    {
+        var entry = await db.DictionaryEntries
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
+
+        if (entry is null)
+            return false;
+
+        db.DictionaryEntries.Remove(entry);
+        await db.SaveChangesAsync(cancellationToken);
+        return true;
+    }
+
     private static string? NormalizeOptional(string? value)
     {
         var trimmed = value?.Trim();

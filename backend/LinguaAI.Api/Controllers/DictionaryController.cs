@@ -39,4 +39,21 @@ public class DictionaryController(IDictionaryService dictionaryService) : Contro
         var entry = await dictionaryService.CreateAsync(userId, request, cancellationToken);
         return Created($"/api/dictionary/{entry.Id}", entry);
     }
+
+    [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserId.From(User);
+        if (userId is null)
+            return Unauthorized();
+
+        var deleted = await dictionaryService.DeleteAsync(userId, id, cancellationToken);
+        if (!deleted)
+            return NotFound();
+
+        return NoContent();
+    }
 }
