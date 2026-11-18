@@ -1,0 +1,247 @@
+:host {
+  display: block;
+  animation: rise 520ms cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.dictionary {
+  width: min(1120px, 100%);
+  margin-inline: auto;
+  padding: clamp(1.5rem, 4vw, 3rem) clamp(1rem, 3vw, 1.5rem) 3rem;
+}
+
+.dictionary__intro {
+  margin-bottom: 1.75rem;
+}
+
+.dictionary__eyebrow {
+  margin: 0 0 0.55rem;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.dictionary__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+  color: var(--ink);
+}
+
+.dictionary__lead {
+  margin: 0.75rem 0 0;
+  max-width: 34rem;
+  color: var(--muted);
+  line-height: 1.55;
+}
+
+.dictionary__back {
+  display: inline-block;
+  margin-top: 1rem;
+  color: var(--accent-strong);
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.dictionary__back:hover {
+  text-decoration: underline;
+}
+
+.dictionary__form {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.25rem;
+  align-items: end;
+}
+
+.field {
+  display: grid;
+  gap: 0.3rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field--wide {
+  grid-column: 1 / -1;
+}
+
+.field input,
+.field select {
+  min-height: 2.6rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--surface) 88%, white);
+  color: var(--ink);
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 500;
+}
+
+.dictionary__save {
+  grid-column: 1 / -1;
+  justify-self: start;
+  min-height: 2.6rem;
+  padding: 0.45rem 1rem;
+  border: 0;
+  border-radius: 0.65rem;
+  background: var(--accent-strong);
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dictionary__save:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dictionary__hint,
+.dictionary__error {
+  margin: 0 0 1rem;
+  padding: 0.9rem 1rem;
+}
+
+.dictionary__hint {
+  color: var(--muted);
+  background: color-mix(in srgb, var(--surface) 80%, white);
+  border-left: 3px solid var(--line);
+}
+
+.dictionary__error {
+  border-left: 3px solid var(--warn);
+  background: color-mix(in srgb, var(--warn) 10%, white);
+}
+
+.dictionary__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.9rem;
+}
+
+.dictionary__item {
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line);
+  border-radius: 0.85rem;
+  background: color-mix(in srgb, var(--surface) 75%, white);
+}
+
+.dictionary__meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem 1rem;
+  align-items: center;
+  margin-bottom: 0.65rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.dictionary__delete {
+  margin-left: auto;
+  min-height: 2rem;
+  padding: 0.25rem 0.7rem;
+  border: 1px solid var(--line);
+  border-radius: 0.55rem;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+.dictionary__delete:hover:not(:disabled) {
+  border-color: var(--warn);
+  color: var(--warn);
+}
+
+.dictionary__delete:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dictionary__term,
+.dictionary__translation,
+.dictionary__example,
+.dictionary__notes {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.dictionary__term {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.dictionary__translation {
+  margin-top: 0.25rem;
+  color: var(--accent-strong);
+  font-weight: 600;
+}
+
+.dictionary__example,
+.dictionary__notes {
+  margin-top: 0.45rem;
+  color: var(--muted);
+}
+
+.dictionary__pager {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 1.25rem;
+  color: var(--muted);
+}
+
+.dictionary__pager button {
+  min-height: 2.4rem;
+  padding: 0.4rem 0.85rem;
+  border: 1px solid var(--line);
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--surface) 88%, white);
+  color: var(--ink);
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.dictionary__pager button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 720px) {
+  .dictionary__form {
+    grid-template-columns: 1fr;
+  }
+
+  .field--wide {
+    grid-column: auto;
+  }
+}

@@ -1,0 +1,143 @@
+<section class="dictionary" aria-labelledby="dictionary-title">
+  <header class="dictionary__intro">
+    <p class="dictionary__eyebrow">Your account</p>
+    <h1 id="dictionary-title" class="dictionary__title">Personal dictionary</h1>
+    <p class="dictionary__lead">
+      Save terms, translations, examples and notes for later review.
+    </p>
+    <a routerLink="/" class="dictionary__back">← Back to translator</a>
+  </header>
+
+  @if (!currentUser()) {
+    <p class="dictionary__hint" role="status">Log in above to manage your dictionary.</p>
+  } @else {
+    <form class="dictionary__form" (ngSubmit)="save()">
+      <label class="field">
+        <span>Term</span>
+        <input
+          type="text"
+          name="term"
+          maxlength="256"
+          [ngModel]="term()"
+          (ngModelChange)="term.set($event)"
+        />
+      </label>
+
+      <label class="field">
+        <span>Translation</span>
+        <input
+          type="text"
+          name="translation"
+          maxlength="256"
+          [ngModel]="translation()"
+          (ngModelChange)="translation.set($event)"
+        />
+      </label>
+
+      <label class="field">
+        <span>From</span>
+        <select
+          name="sourceLanguage"
+          [ngModel]="sourceLanguage()"
+          (ngModelChange)="sourceLanguage.set($event)"
+        >
+          @for (language of languages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>To</span>
+        <select
+          name="targetLanguage"
+          [ngModel]="targetLanguage()"
+          (ngModelChange)="targetLanguage.set($event)"
+        >
+          @for (language of languages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field field--wide">
+        <span>Example sentence</span>
+        <input
+          type="text"
+          name="exampleSentence"
+          maxlength="1000"
+          [ngModel]="exampleSentence()"
+          (ngModelChange)="exampleSentence.set($event)"
+        />
+      </label>
+
+      <label class="field field--wide">
+        <span>Notes</span>
+        <input
+          type="text"
+          name="notes"
+          maxlength="1000"
+          [ngModel]="notes()"
+          (ngModelChange)="notes.set($event)"
+        />
+      </label>
+
+      <button type="submit" class="dictionary__save" [disabled]="!canSave()">
+        {{ saving() ? 'Saving…' : 'Add entry' }}
+      </button>
+    </form>
+
+    @if (error()) {
+      <p class="dictionary__error" role="alert">{{ error() }}</p>
+    }
+
+    @if (loading()) {
+      <p class="dictionary__hint">Loading…</p>
+    } @else if (items().length === 0) {
+      <p class="dictionary__hint">No dictionary entries yet. Add your first term above.</p>
+    } @else {
+      <ul class="dictionary__list">
+        @for (item of items(); track item.id) {
+          <li class="dictionary__item">
+            <div class="dictionary__meta">
+              <span>{{ item.sourceLanguage }} → {{ item.targetLanguage }}</span>
+              <time [attr.datetime]="item.createdAtUtc">
+                {{ item.createdAtUtc | date: 'medium' }}
+              </time>
+              <button
+                type="button"
+                class="dictionary__delete"
+                [disabled]="busyId() !== null"
+                (click)="deleteItem(item)"
+              >
+                Delete
+              </button>
+            </div>
+            <p class="dictionary__term">{{ item.term }}</p>
+            <p class="dictionary__translation">{{ item.translation }}</p>
+            @if (item.exampleSentence) {
+              <p class="dictionary__example">{{ item.exampleSentence }}</p>
+            }
+            @if (item.notes) {
+              <p class="dictionary__notes">{{ item.notes }}</p>
+            }
+          </li>
+        }
+      </ul>
+
+      <div class="dictionary__pager">
+        <button type="button" (click)="previousPage()" [disabled]="page() <= 1 || loading()">
+          Previous
+        </button>
+        <span>Page {{ page() }} of {{ totalPages() }} · {{ totalCount() }} total</span>
+        <button
+          type="button"
+          (click)="nextPage()"
+          [disabled]="page() >= totalPages() || loading()"
+        >
+          Next
+        </button>
+      </div>
+    }
+  }
+</section>
