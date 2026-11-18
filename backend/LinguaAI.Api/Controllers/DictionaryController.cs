@@ -29,7 +29,7 @@ public class DictionaryController(IDictionaryService dictionaryService) : Contro
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<DictionaryEntryDto>> Create(
-        [FromBody] CreateDictionaryEntryRequest request,
+        [FromBody] DictionaryEntryRequest request,
         CancellationToken cancellationToken)
     {
         var userId = CurrentUserId.From(User);
@@ -38,6 +38,27 @@ public class DictionaryController(IDictionaryService dictionaryService) : Contro
 
         var entry = await dictionaryService.CreateAsync(userId, request, cancellationToken);
         return Created($"/api/dictionary/{entry.Id}", entry);
+    }
+
+    [HttpPut("{id:guid}")]
+    [ProducesResponseType(typeof(DictionaryEntryDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<DictionaryEntryDto>> Update(
+        Guid id,
+        [FromBody] DictionaryEntryRequest request,
+        CancellationToken cancellationToken)
+    {
+        var userId = CurrentUserId.From(User);
+        if (userId is null)
+            return Unauthorized();
+
+        var entry = await dictionaryService.UpdateAsync(userId, id, request, cancellationToken);
+        if (entry is null)
+            return NotFound();
+
+        return Ok(entry);
     }
 
     [HttpDelete("{id:guid}")]

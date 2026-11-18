@@ -25,6 +25,7 @@ export class DictionaryPage implements OnInit {
   protected readonly loading = signal(false);
   protected readonly saving = signal(false);
   protected readonly busyId = signal<string | null>(null);
+  protected readonly editingId = signal<string | null>(null);
   protected readonly error = signal<string | null>(null);
 
   protected readonly term = signal('');
@@ -37,6 +38,7 @@ export class DictionaryPage implements OnInit {
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize)),
   );
+  protected readonly isEditing = computed(() => this.editingId() !== null);
   protected readonly canSave = computed(
     () =>
       this.term().trim().length > 0 &&
@@ -78,6 +80,21 @@ export class DictionaryPage implements OnInit {
     });
   }
 
+  protected startEdit(item: DictionaryEntry): void {
+    this.editingId.set(item.id);
+    this.term.set(item.term);
+    this.translation.set(item.translation);
+    this.sourceLanguage.set(item.sourceLanguage);
+    this.targetLanguage.set(item.targetLanguage);
+    this.exampleSentence.set(item.exampleSentence ?? '');
+    this.notes.set(item.notes ?? '');
+    this.error.set(null);
+  }
+
+  protected cancelEdit(): void {
+    this.clearForm();
+  }
+
   protected save(): void {
     if (!this.canSave()) {
       return;
@@ -88,30 +105,37 @@ export class DictionaryPage implements OnInit {
 
     const example = this.exampleSentence().trim();
     const notes = this.notes().trim();
+    const request = {
+      term: this.term().trim(),
+      translation: this.translation().trim(),
+      sourceLanguage: this.sourceLanguage(),
+      targetLanguage: this.targetLanguage(),
+      exampleSentence: example.length > 0 ? example : null,
+      notes: notes.length > 0 ? notes : null,
+    };
 
-    this.dictionary
-      .create({
-        term: this.term().trim(),
-        translation: this.translation().trim(),
-        sourceLanguage: this.sourceLanguage(),
-        targetLanguage: this.targetLanguage(),
-        exampleSentence: example.length > 0 ? example : null,
-        notes: notes.length > 0 ? notes : null,
-      })
-      .subscribe({
-        next: () => {
-          this.term.set('');
-          this.translation.set('');
-          this.exampleSentence.set('');
-          this.notes.set('');
-          this.saving.set(false);
+    const editingId = this.editingId();
+    const call = editingId
+      ? this.dictionary.update(editingId, request)
+      : this.dictionary.create(request);
+
+    call.subscribe({
+      next: (saved) => {
+        if (editingId) {
+          this.items.update((rows) =>
+            rows.map((row) => (row.id === saved.id ? saved : row)),
+          );
+        } else {
           this.load(1);
-        },
-        error: (err: Error) => {
-          this.error.set(err.message);
-          this.saving.set(false);
-        },
-      });
+        }
+        this.clearForm();
+        this.saving.set(false);
+      },
+      error: (err: Error) => {
+        this.error.set(err.message);
+        this.saving.set(false);
+      },
+    });
   }
 
   protected deleteItem(item: DictionaryEntry): void {
@@ -128,6 +152,9 @@ export class DictionaryPage implements OnInit {
 
     this.dictionary.delete(item.id).subscribe({
       next: () => {
+        if (this.editingId() === item.id) {
+          this.clearForm();
+        }
         this.items.update((rows) => rows.filter((row) => row.id !== item.id));
         this.totalCount.update((count) => Math.max(0, count - 1));
         this.busyId.set(null);
@@ -153,5 +180,15 @@ export class DictionaryPage implements OnInit {
     if (this.page() < this.totalPages()) {
       this.load(this.page() + 1);
     }
+  }
+
+  private clearForm(): void {
+    this.editingId.set(null);
+    this.term.set('');
+    this.translation.set('');
+    this.exampleSentence.set('');
+    this.notes.set('');
+    this.sourceLanguage.set('en');
+    this.targetLanguage.set('bs');
   }
 }

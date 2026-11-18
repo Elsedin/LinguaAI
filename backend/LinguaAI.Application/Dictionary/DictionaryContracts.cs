@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace LinguaAI.Application.Dictionary;
 
-public sealed class CreateDictionaryEntryRequest
+public sealed class DictionaryEntryRequest
 {
     [Required]
     [MinLength(1)]
@@ -59,12 +59,18 @@ public interface IDictionaryService
 {
     Task<DictionaryEntryDto> CreateAsync(
         string userId,
-        CreateDictionaryEntryRequest request,
+        DictionaryEntryRequest request,
         CancellationToken cancellationToken = default);
 
     Task<PagedDictionaryResult> ListAsync(
         string userId,
         DictionaryQuery query,
+        CancellationToken cancellationToken = default);
+
+    Task<DictionaryEntryDto?> UpdateAsync(
+        string userId,
+        Guid id,
+        DictionaryEntryRequest request,
         CancellationToken cancellationToken = default);
 
     Task<bool> DeleteAsync(

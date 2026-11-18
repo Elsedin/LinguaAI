@@ -10,35 +10,21 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
 {
     public async Task<DictionaryEntryDto> CreateAsync(
         string userId,
-        CreateDictionaryEntryRequest request,
+        DictionaryEntryRequest request,
         CancellationToken cancellationToken = default)
     {
-        ArgumentNullException.ThrowIfNull(request);
-
-        var term = request.Term?.Trim() ?? string.Empty;
-        var translation = request.Translation?.Trim() ?? string.Empty;
-        if (term.Length == 0)
-            throw new ArgumentException("Term is required.");
-        if (translation.Length == 0)
-            throw new ArgumentException("Translation is required.");
-
-        var source = request.SourceLanguage?.Trim() ?? string.Empty;
-        var target = request.TargetLanguage?.Trim() ?? string.Empty;
-        if (!SupportedLanguages.IsValidTarget(source))
-            throw new ArgumentException("Source language is not supported.");
-        if (!SupportedLanguages.IsValidTarget(target))
-            throw new ArgumentException("Target language is not supported.");
+        var values = Normalize(request);
 
         var entry = new DictionaryEntry
         {
             Id = Guid.NewGuid(),
             UserId = userId,
-            Term = term,
-            Translation = translation,
-            SourceLanguage = source.ToLowerInvariant(),
-            TargetLanguage = target.ToLowerInvariant(),
-            ExampleSentence = NormalizeOptional(request.ExampleSentence),
-            Notes = NormalizeOptional(request.Notes),
+            Term = values.Term,
+            Translation = values.Translation,
+            SourceLanguage = values.SourceLanguage,
+            TargetLanguage = values.TargetLanguage,
+            ExampleSentence = values.ExampleSentence,
+            Notes = values.Notes,
             CreatedAtUtc = DateTime.UtcNow
         };
 
@@ -83,6 +69,30 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
         };
     }
 
+    public async Task<DictionaryEntryDto?> UpdateAsync(
+        string userId,
+        Guid id,
+        DictionaryEntryRequest request,
+        CancellationToken cancellationToken = default)
+    {
+        var entry = await db.DictionaryEntries
+            .FirstOrDefaultAsync(x => x.Id == id && x.UserId == userId, cancellationToken);
+
+        if (entry is null)
+            return null;
+
+        var values = Normalize(request);
+        entry.Term = values.Term;
+        entry.Translation = values.Translation;
+        entry.SourceLanguage = values.SourceLanguage;
+        entry.TargetLanguage = values.TargetLanguage;
+        entry.ExampleSentence = values.ExampleSentence;
+        entry.Notes = values.Notes;
+
+        await db.SaveChangesAsync(cancellationToken);
+        return ToDto(entry);
+    }
+
     public async Task<bool> DeleteAsync(
         string userId,
         Guid id,
@@ -97,6 +107,33 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
         db.DictionaryEntries.Remove(entry);
         await db.SaveChangesAsync(cancellationToken);
         return true;
+    }
+
+    private static NormalizedEntry Normalize(DictionaryEntryRequest request)
+    {
+        ArgumentNullException.ThrowIfNull(request);
+
+        var term = request.Term?.Trim() ?? string.Empty;
+        var translation = request.Translation?.Trim() ?? string.Empty;
+        if (term.Length == 0)
+            throw new ArgumentException("Term is required.");
+        if (translation.Length == 0)
+            throw new ArgumentException("Translation is required.");
+
+        var source = request.SourceLanguage?.Trim() ?? string.Empty;
+        var target = request.TargetLanguage?.Trim() ?? string.Empty;
+        if (!SupportedLanguages.IsValidTarget(source))
+            throw new ArgumentException("Source language is not supported.");
+        if (!SupportedLanguages.IsValidTarget(target))
+            throw new ArgumentException("Target language is not supported.");
+
+        return new NormalizedEntry(
+            term,
+            translation,
+            source.ToLowerInvariant(),
+            target.ToLowerInvariant(),
+            NormalizeOptional(request.ExampleSentence),
+            NormalizeOptional(request.Notes));
     }
 
     private static string? NormalizeOptional(string? value)
@@ -116,4 +153,12 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
         Notes = entry.Notes,
         CreatedAtUtc = entry.CreatedAtUtc
     };
+
+    private sealed record NormalizedEntry(
+        string Term,
+        string Translation,
+        string SourceLanguage,
+        string TargetLanguage,
+        string? ExampleSentence,
+        string? Notes);
 }

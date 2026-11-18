@@ -82,9 +82,16 @@
         />
       </label>
 
-      <button type="submit" class="dictionary__save" [disabled]="!canSave()">
-        {{ saving() ? 'Saving…' : 'Add entry' }}
-      </button>
+      <div class="dictionary__form-actions">
+        <button type="submit" class="dictionary__save" [disabled]="!canSave()">
+          {{ saving() ? 'Saving…' : isEditing() ? 'Update entry' : 'Add entry' }}
+        </button>
+        @if (isEditing()) {
+          <button type="button" class="dictionary__cancel" (click)="cancelEdit()" [disabled]="saving()">
+            Cancel
+          </button>
+        }
+      </div>
     </form>
 
     @if (error()) {
@@ -104,14 +111,24 @@
               <time [attr.datetime]="item.createdAtUtc">
                 {{ item.createdAtUtc | date: 'medium' }}
               </time>
-              <button
-                type="button"
-                class="dictionary__delete"
-                [disabled]="busyId() !== null"
-                (click)="deleteItem(item)"
-              >
-                Delete
-              </button>
+              <div class="dictionary__item-actions">
+                <button
+                  type="button"
+                  class="dictionary__edit"
+                  [disabled]="busyId() !== null || saving()"
+                  (click)="startEdit(item)"
+                >
+                  Edit
+                </button>
+                <button
+                  type="button"
+                  class="dictionary__delete"
+                  [disabled]="busyId() !== null"
+                  (click)="deleteItem(item)"
+                >
+                  Delete
+                </button>
+              </div>
             </div>
             <p class="dictionary__term">{{ item.term }}</p>
             <p class="dictionary__translation">{{ item.translation }}</p>
