@@ -3,8 +3,8 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, catchError, throwError } from 'rxjs';
 import { API_BASE_URL } from '../../core/api.config';
 import {
-  CreateDictionaryEntryRequest,
   DictionaryEntry,
+  DictionaryEntryRequest,
   PagedDictionary,
 } from './dictionary.models';
 
@@ -23,10 +23,18 @@ export class DictionaryService {
     );
   }
 
-  create(request: CreateDictionaryEntryRequest): Observable<DictionaryEntry> {
+  create(request: DictionaryEntryRequest): Observable<DictionaryEntry> {
     return this.http.post<DictionaryEntry>(this.url, request, this.credentials).pipe(
       catchError((error: HttpErrorResponse) =>
         throwError(() => new Error(this.readError(error, 'Could not save dictionary entry.'))),
+      ),
+    );
+  }
+
+  update(id: string, request: DictionaryEntryRequest): Observable<DictionaryEntry> {
+    return this.http.put<DictionaryEntry>(`${this.url}/${id}`, request, this.credentials).pipe(
+      catchError((error: HttpErrorResponse) =>
+        throwError(() => new Error(this.readError(error, 'Could not update dictionary entry.'))),
       ),
     );
   }

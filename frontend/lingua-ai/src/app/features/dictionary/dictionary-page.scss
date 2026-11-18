@@ -85,20 +85,36 @@
   font-weight: 500;
 }
 
-.dictionary__save {
+.dictionary__form-actions {
   grid-column: 1 / -1;
-  justify-self: start;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.dictionary__save,
+.dictionary__cancel {
   min-height: 2.6rem;
   padding: 0.45rem 1rem;
-  border: 0;
   border-radius: 0.65rem;
-  background: var(--accent-strong);
-  color: white;
   font-weight: 700;
   cursor: pointer;
 }
 
-.dictionary__save:disabled {
+.dictionary__save {
+  border: 0;
+  background: var(--accent-strong);
+  color: white;
+}
+
+.dictionary__cancel {
+  border: 1px solid var(--line);
+  background: transparent;
+  color: var(--muted);
+}
+
+.dictionary__save:disabled,
+.dictionary__cancel:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
@@ -148,8 +164,15 @@
   color: var(--muted);
 }
 
-.dictionary__delete {
+.dictionary__item-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
   margin-left: auto;
+}
+
+.dictionary__edit,
+.dictionary__delete {
   min-height: 2rem;
   padding: 0.25rem 0.7rem;
   border: 1px solid var(--line);
@@ -163,11 +186,17 @@
   cursor: pointer;
 }
 
+.dictionary__edit:hover:not(:disabled) {
+  border-color: var(--accent);
+  color: var(--accent-strong);
+}
+
 .dictionary__delete:hover:not(:disabled) {
   border-color: var(--warn);
   color: var(--warn);
 }
 
+.dictionary__edit:disabled,
 .dictionary__delete:disabled {
   opacity: 0.5;
   cursor: not-allowed;

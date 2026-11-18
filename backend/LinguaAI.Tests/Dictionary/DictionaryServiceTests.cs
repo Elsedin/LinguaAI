@@ -14,7 +14,7 @@ public class DictionaryServiceTests
         await using var db = CreateDb();
         var service = new DictionaryService(db);
 
-        var created = await service.CreateAsync("user-a", new CreateDictionaryEntryRequest
+        var created = await service.CreateAsync("user-a", new DictionaryEntryRequest
         {
             Term = "  hello  ",
             Translation = "  zdravo  ",
@@ -59,7 +59,7 @@ public class DictionaryServiceTests
         var service = new DictionaryService(db);
 
         var ex = await Assert.ThrowsAsync<ArgumentException>(() =>
-            service.CreateAsync("user-a", new CreateDictionaryEntryRequest
+            service.CreateAsync("user-a", new DictionaryEntryRequest
             {
                 Term = "hello",
                 Translation = "zdravo",
@@ -68,6 +68,52 @@ public class DictionaryServiceTests
             }));
 
         Assert.Contains("Target language", ex.Message, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_updates_owned_entry()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-a", "old");
+        db.DictionaryEntries.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var updated = await service.UpdateAsync("user-a", row.Id, new DictionaryEntryRequest
+        {
+            Term = "new term",
+            Translation = "novi prevod",
+            SourceLanguage = "en",
+            TargetLanguage = "bs",
+            Notes = "updated"
+        });
+
+        Assert.NotNull(updated);
+        Assert.Equal("new term", updated.Term);
+        Assert.Equal("novi prevod", updated.Translation);
+        Assert.Equal("updated", updated.Notes);
+        Assert.Equal("new term", (await db.DictionaryEntries.SingleAsync()).Term);
+    }
+
+    [Fact]
+    public async Task UpdateAsync_returns_null_for_other_users_entry()
+    {
+        await using var db = CreateDb();
+        var row = CreateRow("user-b", "secret");
+        db.DictionaryEntries.Add(row);
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var updated = await service.UpdateAsync("user-a", row.Id, new DictionaryEntryRequest
+        {
+            Term = "hacked",
+            Translation = "nope",
+            SourceLanguage = "en",
+            TargetLanguage = "bs"
+        });
+
+        Assert.Null(updated);
+        Assert.Equal("secret", (await db.DictionaryEntries.SingleAsync()).Term);
     }
 
     [Fact]

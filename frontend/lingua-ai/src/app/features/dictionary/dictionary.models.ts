@@ -16,7 +16,7 @@ export interface PagedDictionary {
   totalCount: number;
 }
 
-export interface CreateDictionaryEntryRequest {
+export interface DictionaryEntryRequest {
   term: string;
   translation: string;
   sourceLanguage: string;
