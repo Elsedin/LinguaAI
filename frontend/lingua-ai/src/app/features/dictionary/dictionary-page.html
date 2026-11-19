@@ -94,6 +94,56 @@
       </div>
     </form>
 
+    <form class="dictionary__filters" (ngSubmit)="applyFilters()">
+      <label class="field field--search">
+        <span>Search</span>
+        <input
+          type="search"
+          name="search"
+          placeholder="Search term, translation, notes…"
+          [ngModel]="searchDraft()"
+          (ngModelChange)="searchDraft.set($event)"
+        />
+      </label>
+
+      <label class="field">
+        <span>From</span>
+        <select
+          name="filterSourceLanguage"
+          [ngModel]="filterSourceLanguage()"
+          (ngModelChange)="filterSourceLanguage.set($event)"
+        >
+          <option value="">Any</option>
+          @for (language of languages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>To</span>
+        <select
+          name="filterTargetLanguage"
+          [ngModel]="filterTargetLanguage()"
+          (ngModelChange)="filterTargetLanguage.set($event)"
+        >
+          <option value="">Any</option>
+          @for (language of languages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <div class="dictionary__filter-actions">
+        <button type="submit" class="dictionary__save" [disabled]="loading()">Search</button>
+        @if (hasActiveFilters()) {
+          <button type="button" class="dictionary__cancel" (click)="clearFilters()" [disabled]="loading()">
+            Clear
+          </button>
+        }
+      </div>
+    </form>
+
     @if (error()) {
       <p class="dictionary__error" role="alert">{{ error() }}</p>
     }
@@ -101,7 +151,13 @@
     @if (loading()) {
       <p class="dictionary__hint">Loading…</p>
     } @else if (items().length === 0) {
-      <p class="dictionary__hint">No dictionary entries yet. Add your first term above.</p>
+      <p class="dictionary__hint">
+        @if (hasActiveFilters()) {
+          No dictionary entries match your filters.
+        } @else {
+          No dictionary entries yet. Add your first term above.
+        }
+      </p>
     } @else {
       <ul class="dictionary__list">
         @for (item of items(); track item.id) {

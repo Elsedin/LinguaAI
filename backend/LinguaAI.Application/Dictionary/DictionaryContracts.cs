@@ -33,6 +33,9 @@ public sealed class DictionaryQuery
 {
     public int Page { get; set; } = 1;
     public int PageSize { get; set; } = 20;
+    public string? Search { get; set; }
+    public string? SourceLanguage { get; set; }
+    public string? TargetLanguage { get; set; }
 }
 
 public sealed class DictionaryEntryDto

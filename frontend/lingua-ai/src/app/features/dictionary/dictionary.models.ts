@@ -25,6 +25,14 @@ export interface DictionaryEntryRequest {
   notes?: string | null;
 }
 
+export interface DictionaryListQuery {
+  page?: number;
+  pageSize?: number;
+  search?: string;
+  sourceLanguage?: string;
+  targetLanguage?: string;
+}
+
 export interface LanguageOption {
   code: string;
   label: string;

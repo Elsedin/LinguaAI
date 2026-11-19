@@ -50,11 +50,29 @@
   text-decoration: underline;
 }
 
-.dictionary__form {
+.dictionary__form,
+.dictionary__filters {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 0.75rem 1rem;
   margin-bottom: 1.25rem;
+  align-items: end;
+}
+
+.dictionary__filters {
+  grid-template-columns: 1.4fr 1fr 1fr auto;
+  padding-top: 0.25rem;
+  border-top: 1px solid var(--line);
+}
+
+.field--search {
+  min-width: 0;
+}
+
+.dictionary__filter-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
   align-items: end;
 }
 
@@ -265,12 +283,14 @@
   }
 }
 
-@media (max-width: 720px) {
-  .dictionary__form {
+@media (max-width: 860px) {
+  .dictionary__form,
+  .dictionary__filters {
     grid-template-columns: 1fr;
   }
 
-  .field--wide {
+  .field--wide,
+  .dictionary__filter-actions {
     grid-column: auto;
   }
 }

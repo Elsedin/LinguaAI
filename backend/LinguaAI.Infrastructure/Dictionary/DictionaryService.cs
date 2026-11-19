@@ -41,9 +41,9 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
     {
         var page = Math.Max(1, query.Page);
         var pageSize = Math.Clamp(query.PageSize, 1, 50);
-        var owned = db.DictionaryEntries.Where(x => x.UserId == userId);
-        var total = await owned.CountAsync(cancellationToken);
-        var items = await owned
+        var filtered = ApplyFilters(db.DictionaryEntries.Where(x => x.UserId == userId), query);
+        var total = await filtered.CountAsync(cancellationToken);
+        var items = await filtered
             .OrderByDescending(x => x.CreatedAtUtc)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
@@ -67,6 +67,35 @@ public sealed class DictionaryService(AppDbContext db) : IDictionaryService
             PageSize = pageSize,
             TotalCount = total
         };
+    }
+
+    private static IQueryable<DictionaryEntry> ApplyFilters(
+        IQueryable<DictionaryEntry> rows,
+        DictionaryQuery query)
+    {
+        var search = query.Search?.Trim();
+        if (!string.IsNullOrEmpty(search))
+        {
+            if (search.Length > 200)
+                search = search[..200];
+
+            var term = search.ToLowerInvariant();
+            rows = rows.Where(x =>
+                x.Term.ToLower().Contains(term) ||
+                x.Translation.ToLower().Contains(term) ||
+                (x.Notes != null && x.Notes.ToLower().Contains(term)) ||
+                (x.ExampleSentence != null && x.ExampleSentence.ToLower().Contains(term)));
+        }
+
+        var sourceLanguage = query.SourceLanguage?.Trim();
+        if (!string.IsNullOrEmpty(sourceLanguage))
+            rows = rows.Where(x => x.SourceLanguage == sourceLanguage);
+
+        var targetLanguage = query.TargetLanguage?.Trim();
+        if (!string.IsNullOrEmpty(targetLanguage))
+            rows = rows.Where(x => x.TargetLanguage == targetLanguage);
+
+        return rows;
     }
 
     public async Task<DictionaryEntryDto?> UpdateAsync(
