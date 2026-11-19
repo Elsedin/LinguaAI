@@ -71,6 +71,52 @@ public class DictionaryServiceTests
     }
 
     [Fact]
+    public async Task ListAsync_filters_by_search_text()
+    {
+        await using var db = CreateDb();
+        db.DictionaryEntries.AddRange(
+            CreateRow("user-a", "airport", translation: "aerodrom"),
+            CreateRow("user-a", "hello", translation: "zdravo"),
+            CreateRow("user-a", "train", translation: "voz", notes: "airport nearby"));
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var result = await service.ListAsync("user-a", new DictionaryQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            Search = "airport"
+        });
+
+        Assert.Equal(2, result.TotalCount);
+        Assert.Contains(result.Items, item => item.Term == "airport");
+        Assert.Contains(result.Items, item => item.Term == "train");
+    }
+
+    [Fact]
+    public async Task ListAsync_filters_by_languages()
+    {
+        await using var db = CreateDb();
+        db.DictionaryEntries.AddRange(
+            CreateRow("user-a", "one", sourceLanguage: "en", targetLanguage: "bs"),
+            CreateRow("user-a", "two", sourceLanguage: "en", targetLanguage: "de"),
+            CreateRow("user-a", "three", sourceLanguage: "de", targetLanguage: "bs"));
+        await db.SaveChangesAsync();
+
+        var service = new DictionaryService(db);
+        var result = await service.ListAsync("user-a", new DictionaryQuery
+        {
+            Page = 1,
+            PageSize = 10,
+            SourceLanguage = "en",
+            TargetLanguage = "bs"
+        });
+
+        Assert.Equal(1, result.TotalCount);
+        Assert.Equal("one", result.Items[0].Term);
+    }
+
+    [Fact]
     public async Task UpdateAsync_updates_owned_entry()
     {
         await using var db = CreateDb();
@@ -154,14 +200,21 @@ public class DictionaryServiceTests
         return new AppDbContext(options);
     }
 
-    private static DictionaryEntry CreateRow(string userId, string term) => new()
+    private static DictionaryEntry CreateRow(
+        string userId,
+        string term,
+        string translation = "translated",
+        string sourceLanguage = "en",
+        string targetLanguage = "bs",
+        string? notes = null) => new()
     {
         Id = Guid.NewGuid(),
         UserId = userId,
         Term = term,
-        Translation = "translated",
-        SourceLanguage = "en",
-        TargetLanguage = "bs",
+        Translation = translation,
+        SourceLanguage = sourceLanguage,
+        TargetLanguage = targetLanguage,
+        Notes = notes,
         CreatedAtUtc = DateTime.UtcNow
     };
 }

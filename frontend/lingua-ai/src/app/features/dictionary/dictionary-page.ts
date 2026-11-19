@@ -35,10 +35,21 @@ export class DictionaryPage implements OnInit {
   protected readonly exampleSentence = signal('');
   protected readonly notes = signal('');
 
+  protected readonly searchDraft = signal('');
+  protected readonly activeSearch = signal('');
+  protected readonly filterSourceLanguage = signal('');
+  protected readonly filterTargetLanguage = signal('');
+
   protected readonly totalPages = computed(() =>
     Math.max(1, Math.ceil(this.totalCount() / this.pageSize)),
   );
   protected readonly isEditing = computed(() => this.editingId() !== null);
+  protected readonly hasActiveFilters = computed(
+    () =>
+      this.activeSearch().length > 0 ||
+      this.filterSourceLanguage().length > 0 ||
+      this.filterTargetLanguage().length > 0,
+  );
   protected readonly canSave = computed(
     () =>
       this.term().trim().length > 0 &&
@@ -62,22 +73,43 @@ export class DictionaryPage implements OnInit {
     });
   }
 
+  protected applyFilters(): void {
+    this.activeSearch.set(this.searchDraft().trim());
+    this.load(1);
+  }
+
+  protected clearFilters(): void {
+    this.searchDraft.set('');
+    this.activeSearch.set('');
+    this.filterSourceLanguage.set('');
+    this.filterTargetLanguage.set('');
+    this.load(1);
+  }
+
   protected load(page = this.page()): void {
     this.loading.set(true);
     this.error.set(null);
     this.page.set(page);
 
-    this.dictionary.list(page, this.pageSize).subscribe({
-      next: (result) => {
-        this.items.set(result.items);
-        this.totalCount.set(result.totalCount);
-        this.loading.set(false);
-      },
-      error: (err: Error) => {
-        this.error.set(err.message);
-        this.loading.set(false);
-      },
-    });
+    this.dictionary
+      .list({
+        page,
+        pageSize: this.pageSize,
+        search: this.activeSearch(),
+        sourceLanguage: this.filterSourceLanguage(),
+        targetLanguage: this.filterTargetLanguage(),
+      })
+      .subscribe({
+        next: (result) => {
+          this.items.set(result.items);
+          this.totalCount.set(result.totalCount);
+          this.loading.set(false);
+        },
+        error: (err: Error) => {
+          this.error.set(err.message);
+          this.loading.set(false);
+        },
+      });
   }
 
   protected startEdit(item: DictionaryEntry): void {

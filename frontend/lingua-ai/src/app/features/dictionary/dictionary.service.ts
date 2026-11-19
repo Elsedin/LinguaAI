@@ -5,6 +5,7 @@ import { API_BASE_URL } from '../../core/api.config';
 import {
   DictionaryEntry,
   DictionaryEntryRequest,
+  DictionaryListQuery,
   PagedDictionary,
 } from './dictionary.models';
 
@@ -14,8 +15,26 @@ export class DictionaryService {
   private readonly url = `${API_BASE_URL}/api/dictionary`;
   private readonly credentials = { withCredentials: true };
 
-  list(page = 1, pageSize = 20): Observable<PagedDictionary> {
-    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
+  list(query: DictionaryListQuery = {}): Observable<PagedDictionary> {
+    let params = new HttpParams()
+      .set('page', query.page ?? 1)
+      .set('pageSize', query.pageSize ?? 20);
+
+    const search = query.search?.trim();
+    if (search) {
+      params = params.set('search', search);
+    }
+
+    const sourceLanguage = query.sourceLanguage?.trim();
+    if (sourceLanguage) {
+      params = params.set('sourceLanguage', sourceLanguage);
+    }
+
+    const targetLanguage = query.targetLanguage?.trim();
+    if (targetLanguage) {
+      params = params.set('targetLanguage', targetLanguage);
+    }
+
     return this.http.get<PagedDictionary>(this.url, { ...this.credentials, params }).pipe(
       catchError((error: HttpErrorResponse) =>
         throwError(() => new Error(this.readError(error, 'Could not load dictionary.'))),
