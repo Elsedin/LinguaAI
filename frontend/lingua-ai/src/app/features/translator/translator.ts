@@ -1,5 +1,8 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { AuthService } from '../auth/auth.service';
+import { PreferencesService } from '../preferences/preferences.service';
+import { UserPreferences } from '../preferences/preferences.models';
 import { TranslationService } from './translation.service';
 import {
   MAX_TEXT_LENGTH,
@@ -16,6 +19,9 @@ import {
 })
 export class Translator {
   private readonly translationService = inject(TranslationService);
+  private readonly auth = inject(AuthService);
+  private readonly preferences = inject(PreferencesService);
+  private preferencesApplied = false;
 
   protected readonly sourceLanguages = SOURCE_LANGUAGES;
   protected readonly targetLanguages = TARGET_LANGUAGES;
@@ -36,6 +42,23 @@ export class Translator {
     () => this.sourceText().trim().length > 0 && !this.loading(),
   );
   protected readonly canSwap = computed(() => this.sourceLanguage() !== 'auto');
+
+  constructor() {
+    effect(() => {
+      const user = this.auth.currentUser();
+      if (!user || this.preferencesApplied) {
+        return;
+      }
+
+      this.preferencesApplied = true;
+      this.preferences.get().subscribe({
+        next: (prefs) => this.applyPreferences(prefs),
+        error: () => {
+          this.preferencesApplied = false;
+        },
+      });
+    });
+  }
 
   protected translate(): void {
     if (!this.canTranslate()) {
@@ -102,6 +125,23 @@ export class Translator {
       window.setTimeout(() => this.copied.set(false), 1600);
     } catch {
       this.error.set('Could not copy to clipboard.');
+    }
+  }
+
+  private applyPreferences(prefs: UserPreferences): void {
+    const source = prefs.preferredSourceLanguage?.trim();
+    if (source && this.sourceLanguages.some((item) => item.code === source)) {
+      this.sourceLanguage.set(source);
+    }
+
+    const target = prefs.preferredTargetLanguage?.trim();
+    if (target && this.targetLanguages.some((item) => item.code === target)) {
+      this.targetLanguage.set(target);
+    }
+
+    const style = prefs.preferredStyle?.trim();
+    if (style && this.styles.some((item) => item.value === style)) {
+      this.style.set(style);
     }
   }
 }
