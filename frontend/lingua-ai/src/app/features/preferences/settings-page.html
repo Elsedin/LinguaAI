@@ -1,0 +1,68 @@
+<section class="settings" aria-labelledby="settings-title">
+  <header class="settings__intro">
+    <p class="settings__eyebrow">Your account</p>
+    <h1 id="settings-title" class="settings__title">Preferences</h1>
+    <p class="settings__lead">
+      Set your default translation languages and style. These are saved for your account.
+    </p>
+    <a routerLink="/" class="settings__back">← Back to translator</a>
+  </header>
+
+  @if (!currentUser()) {
+    <p class="settings__hint" role="status">Log in above to manage your preferences.</p>
+  } @else if (loading()) {
+    <p class="settings__hint">Loading…</p>
+  } @else {
+    <form class="settings__form" (ngSubmit)="save()">
+      <label class="field">
+        <span>Default source language</span>
+        <select
+          name="sourceLanguage"
+          [ngModel]="sourceLanguage()"
+          (ngModelChange)="sourceLanguage.set($event)"
+        >
+          <option value="">Not set</option>
+          @for (language of sourceLanguages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Default target language</span>
+        <select
+          name="targetLanguage"
+          [ngModel]="targetLanguage()"
+          (ngModelChange)="targetLanguage.set($event)"
+        >
+          <option value="">Not set</option>
+          @for (language of targetLanguages; track language.code) {
+            <option [value]="language.code">{{ language.label }}</option>
+          }
+        </select>
+      </label>
+
+      <label class="field field--wide">
+        <span>Default style</span>
+        <select name="style" [ngModel]="style()" (ngModelChange)="style.set($event)">
+          <option value="">Not set</option>
+          @for (item of styles; track item.value) {
+            <option [value]="item.value">{{ item.label }}</option>
+          }
+        </select>
+      </label>
+
+      @if (error()) {
+        <p class="settings__error" role="alert">{{ error() }}</p>
+      }
+
+      @if (saved()) {
+        <p class="settings__saved" role="status">Preferences saved.</p>
+      }
+
+      <button type="submit" class="settings__save" [disabled]="!canSave()">
+        {{ saving() ? 'Saving…' : 'Save preferences' }}
+      </button>
+    </form>
+  }
+</section>
