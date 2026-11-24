@@ -1,0 +1,97 @@
+<section class="dash" aria-labelledby="dash-title">
+  <header class="dash__intro">
+    <p class="dash__eyebrow">Your account</p>
+    <h1 id="dash-title" class="dash__title">Dashboard</h1>
+    <p class="dash__lead">
+      A quick look at your translations, favorites, dictionary, and recent activity.
+    </p>
+    <a routerLink="/" class="dash__back">← Back to translator</a>
+  </header>
+
+  @if (!currentUser()) {
+    <p class="dash__hint" role="status">Log in above to see your dashboard.</p>
+  } @else if (loading()) {
+    <p class="dash__hint">Loading…</p>
+  } @else if (error()) {
+    <p class="dash__error" role="alert">{{ error() }}</p>
+  } @else if (summary(); as data) {
+    <div class="dash__stats" role="list">
+      <div class="stat" role="listitem">
+        <p class="stat__value">{{ data.totalTranslations }}</p>
+        <p class="stat__label">Translations</p>
+      </div>
+      <div class="stat" role="listitem">
+        <p class="stat__value">{{ data.favoriteCount }}</p>
+        <p class="stat__label">Favorites</p>
+      </div>
+      <div class="stat" role="listitem">
+        <p class="stat__value">{{ data.dictionaryEntryCount }}</p>
+        <p class="stat__label">Dictionary</p>
+      </div>
+    </div>
+
+    <div class="dash__grid">
+      <section class="panel" aria-labelledby="pairs-title">
+        <h2 id="pairs-title" class="panel__title">Top language pairs</h2>
+        @if (data.topLanguagePairs.length === 0) {
+          <p class="panel__empty">No translations yet.</p>
+        } @else {
+          <ul class="pairs">
+            @for (pair of data.topLanguagePairs; track pair.sourceLanguage + '-' + pair.targetLanguage) {
+              <li class="pairs__row">
+                <span class="pairs__langs">{{ pair.sourceLanguage }} → {{ pair.targetLanguage }}</span>
+                <span class="pairs__count">{{ pair.count }}</span>
+              </li>
+            }
+          </ul>
+        }
+      </section>
+
+      <section class="panel" aria-labelledby="activity-title">
+        <h2 id="activity-title" class="panel__title">Last 14 days</h2>
+        <div class="bars" role="img" aria-label="Translation activity by day">
+          @for (day of data.activityByDay; track day.date) {
+            <div class="bars__col">
+              <div class="bars__track">
+                <div
+                  class="bars__fill"
+                  [style.height.%]="barHeight(day)"
+                  [attr.title]="day.date + ': ' + day.count"
+                ></div>
+              </div>
+              <span class="bars__day">{{ day.date | date: 'd' }}</span>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <section class="panel panel--wide" aria-labelledby="recent-title">
+      <div class="panel__head">
+        <h2 id="recent-title" class="panel__title">Recent activity</h2>
+        <a routerLink="/history" class="panel__link">View history</a>
+      </div>
+      @if (data.recentActivity.length === 0) {
+        <p class="panel__empty">Nothing here yet — try a translation.</p>
+      } @else {
+        <ul class="recent">
+          @for (item of data.recentActivity; track item.id) {
+            <li class="recent__item">
+              <p class="recent__meta">
+                {{ item.sourceLanguage }} → {{ item.targetLanguage }} · {{ item.style }}
+                @if (item.isFavorite) {
+                  <span class="recent__fav">★</span>
+                }
+                <time [attr.datetime]="item.createdAtUtc">
+                  {{ item.createdAtUtc | date: 'medium' }}
+                </time>
+              </p>
+              <p class="recent__text">{{ item.sourcePreview }}</p>
+              <p class="recent__text recent__text--out">{{ item.translatedPreview }}</p>
+            </li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</section>

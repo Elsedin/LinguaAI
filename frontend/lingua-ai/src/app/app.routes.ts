@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { DashboardPage } from './features/dashboard/dashboard-page';
 import { DictionaryPage } from './features/dictionary/dictionary-page';
 import { HistoryList } from './features/history/history-list';
 import { SettingsPage } from './features/preferences/settings-page';
@@ -10,6 +11,7 @@ export const routes: Routes = [
   { path: 'writing', component: WritingAssistant },
   { path: 'history', component: HistoryList },
   { path: 'dictionary', component: DictionaryPage },
+  { path: 'dashboard', component: DashboardPage },
   { path: 'settings', component: SettingsPage },
   { path: '**', redirectTo: '' },
 ];
