@@ -48,7 +48,10 @@ public class AuthController(
             user,
             request.Password,
             isPersistent: true,
-            lockoutOnFailure: false);
+            lockoutOnFailure: true);
+
+        if (signInResult.IsLockedOut)
+            return Unauthorized(new { detail = "Account temporarily locked. Try again later." });
 
         if (!signInResult.Succeeded)
             return Unauthorized(new { detail = "Invalid email or password." });
